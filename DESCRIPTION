@@ -1,6 +1,6 @@
 Package: texreg
-Version: 1.01
-Date: 2012-06-19
+Version: 1.02
+Date: 2012-06-21
 Title: Conversion of R regression output to LaTeX tables.
 Author: Philip Leifeld
 Maintainer: Philip Leifeld <philip.leifeld@eawag.ch>
@@ -15,6 +15,6 @@ Suggests: ergm, network, nlme
 License: GPL-3
 Repository: CRAN
 Repository/R-Forge/Project: texreg
-Repository/R-Forge/Revision: 12
-Packaged: 2012-06-19 18:18:40 UTC; rforge
-Date/Publication: 2012-06-20 06:09:06
+Repository/R-Forge/Revision: 23
+Packaged: 2012-06-21 10:15:51 UTC; rforge
+Date/Publication: 2012-06-21 12:18:19
