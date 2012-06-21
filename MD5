@@ -1,9 +1,9 @@
-f60a502d3e47bbaa08fa42578c8852b5 *DESCRIPTION
+0569055e38d31748dbe66419f9782db5 *DESCRIPTION
 965c0e101cf3cab42e924c1c849184ea *NAMESPACE
-9b15950b5b70ef9f6b71a3f8d3b8a2aa *R/texreg.R
+14feb9fbc7ccfb78c37edb8ba4c2d73a *R/texreg.R
 3a67b5cf58e18e4c8737654238abb15e *inst/CITATION
-c4d4ad77b180953ae7d7cda4cdf34027 *inst/doc/texreg.Rnw
-f40ddc877b63fe904a7762f3a1fc3dfa *inst/doc/texreg.pdf
+462ae2ae1051e585770dd9e2ec4ef1f4 *inst/doc/texreg.Rnw
+1c63e6f8cf9e5fc1f559d67e19cb2b41 *inst/doc/texreg.pdf
 b40090213199fe2dde17ed5084606524 *man/texreg-package.Rd
-1a35f831ab254c01eaa13d7f4fe6fd88 *man/texreg.Rd
-c4d4ad77b180953ae7d7cda4cdf34027 *vignettes/texreg.Rnw
+9cc5231a1278c4e36895f1cb26138ee8 *man/texreg.Rd
+462ae2ae1051e585770dd9e2ec4ef1f4 *vignettes/texreg.Rnw
