@@ -1,6 +1,6 @@
 \name{texreg}
 \alias{texreg}
-\title{Get network data}
+\title{Convert regression output to LaTeX tables}
 \description{Conversion of R regression output to LaTeX tables.}
 \usage{
 texreg(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE, 
@@ -8,18 +8,17 @@ texreg(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     strong.signif=FALSE, symbol="\\\\cdot", use.packages=TRUE, 
     caption="Statistical models", label="table:coefficients", 
     dcolumn=TRUE, booktabs=TRUE, scriptsize=FALSE, 
-    custom.names=NA, model.names=NA)
+    custom.names=NA, model.names=NA, digits=2, ...)
 }
 \details{
 texreg converts coefficients, standard errors, significance stars, 
-and goodness-of-fit statistics of statistical models (currently: lm, lme, gls, 
-glm and ergm objects) into LaTeX tables. Either a single model or a list of 
-models can be combined in a single table. The output is customizable. Models 
-can be handed over as lists of objects. New model types can be easily 
-implemented.
+and goodness-of-fit statistics of statistical models into LaTeX 
+tables. Either a single model or a list of models can be combined 
+in a single table. The output is customizable. Models can be handed 
+over as lists of objects. New model types can be easily implemented.
 }
 \arguments{
-\item{l}{ An lm, lme, gls, glm or ergm object. The method accepts a single model or a list of models. Lists of models can be specified as \code{l = list(model.1, model.2, ...)}. Different object types can also be mixed. }
+\item{l}{ An lm, lme, lrm, gls, glm, ergm, plm, pmg, rq or clogit object. The method accepts a single model or a list of models. Lists of models can be specified as \code{l = list(model.1, model.2, ...)}. Different object types can also be mixed. }
 \item{single.row}{ By default, a model parameter takes up two lines of the table: the standard error is listed in parentheses under the coefficient. This saves a lot of horizontal space on the page and is the default table format in most academic journals. If \code{single.row=TRUE} is activated, however, both coefficient and standard error are placed in a single table cell in the same line. }
 \item{no.margin}{ In order to save space, inner margins of tables are switched off by default. To reactivate the default table spacing, set \code{no.margin=FALSE}. }
 \item{leading.zero}{ Most journals require leading zeros of coefficients and standard errors (for example, \code{0.35}). This is also the default texreg behavior. Some journals, however, require omission of leading zeros (for example, \code{.35}). This can be achieved by setting \code{leading.zero=FALSE}. }
@@ -38,6 +37,8 @@ implemented.
 
 Sometimes it happens that the same variable has a different name in different models. In this case, the user can use this function to assign identical names. If possible, the rows will then be merged into a single row unless both rows contain values in the same column. }
 \item{model.names}{ A string vector of labels for the models. By default, the models are named Model 1, Model 2, etc. Specifying \code{model.names=c("My name 1", "My name 2")} etc. overrides the default behavior. }
+\item{digits}{ Set the number of decimal places for coefficients, standard errors and goodness-of-fit statistics. Do not use negative values! }
+\item{...}{ Custom options to be passed on to the extract function. }
 }
 \seealso{
 \code{\link{texreg-package}}

@@ -2,16 +2,31 @@
 # Please use the forum at http://r-forge.r-project.org/projects/texreg/ 
 # for bug reports, help or feature requests.
 
+
 # function which reformats a coefficient with two decimal places
-coef.to.string <- function(x, lead.zero=FALSE) {
+coeftostring <- function(x, lead.zero=FALSE, digits=2) {
   if (is.na(x)) {
     return("")
   }
-  y <- as.character(round(x, 2))
-  if (grepl("\\.", y) == FALSE) {
-    y <- paste(y, ".00", sep="")
-  } else if (grepl("\\.[0-9]$", y) == TRUE) {
-    y <- paste(y, "0", sep="")
+  if (digits < 0) {
+    stop("The number of digits must be 0 or higher.")
+  }
+  y <- as.character(round(x, digits))
+  
+  actual.digits <- attributes(regexpr("\\.[0-9]+$", y))$match.length - 1
+  if (grepl("\\.", y) == FALSE) { #no decimal places present
+    zeros <- paste(rep("0", digits), collapse="")
+    y <- paste(y, ".", zeros, sep="")
+  } else if (grepl("\\.[0-9]$", y) == TRUE && digits > 1) { #only one decimal p.
+    zeros <- paste(rep("0", digits-1), collapse="")
+    y <- paste(y, zeros, sep="")
+  } else if (actual.digits < digits) { #more desired digits than present
+    fill <- digits - actual.digits
+    zeros <- paste(rep("0", fill), collapse="")
+    y <- paste(y, zeros, sep="")
+  }
+  if (grepl("\\.$", y) == TRUE) {
+    y <- gsub("\\.$", "", y)
   }
   if (lead.zero==FALSE && (grepl("^0",y) == TRUE || grepl("^-0",y) == TRUE)) {
     y <- gsub("0\\.", "\\.", y)
@@ -20,34 +35,67 @@ coef.to.string <- function(x, lead.zero=FALSE) {
 }
 
 
-# extension for lm objects
-extract.lm <- function(model) {
-  
-  if (!class(model) == "lm") {
-    stop("Internal error: Incorrect model type! Should be an lm object!")
-  }
-  
-  tab <- summary(model)$coef[,-3] #extract coefficient table
-  
-  rs <- summary(model)$r.squared #extract R-squared
-  adj <- summary(model)$adj.r.squared #extract adjusted R-squared
-  n <- nobs(model) #extract number of observations
-  
-  gof <- matrix(c(rs, adj, n), ncol=1)
-  row.names(gof) <- c("R$^2$", "Adj. R$^2$", "Num. obs.")
+# generic extract function
+setGeneric("extract", function(model, ...) standardGeneric("extract"), 
+    package="texreg")
+
+
+# extension for clogit objects (survival package); submitted by Sebastian Daza
+extract.clogit <- function(model) {
+  tab <- summary(model)$coef[,c(-2,-4)]
+  aic <- extractAIC(model)[2]
+  event <- model$nevent
+  n <- model$n
+  mis <- length(model$na.action)
+  gof <- matrix(c(aic, event, n, mis), ncol=1)
+  row.names(gof) <- c("AIC", "Events", "Num. obs.", "Missings")
   
   table.content <- list(tab, gof)
   return(table.content)
 }
 
+setMethod("extract", signature=className("clogit", "survival"), 
+    definition = extract.clogit)
+
+
+# extension for ergm objects
+extract.ergm <- function(model) {
+  tab <- summary(model)$coefs[,-3] #extract coefficient table
+  
+  lik <- model$mle.lik[1] #extract log likelihood
+  aic <- summary(model)$aic #extract AIC
+  bic <- summary(model)$bic #extract BIC
+  gof <- matrix(c(aic, bic, lik), ncol=1)
+  row.names(gof) <- c("AIC", "BIC", "Log Likelihood")
+  
+  table.content <- list(tab, gof)
+  return(table.content)
+}
+
+setMethod("extract", signature=className("ergm", "ergm"), 
+    definition = extract.ergm)
+
+
+# extension for glm objects
+extract.glm <- function(model) {
+  tab <- summary(model)$coef[,-3] #extract coefficient table
+  
+  aic <- summary(model)$aic #extract AIC
+  n <- nobs(model) #extract number of observations
+  
+  gof <- matrix(c(aic, n), ncol=1)
+  row.names(gof) <- c("AIC", "Num. obs.")
+  
+  table.content <- list(tab, gof)
+  return(table.content)
+}
+
+setMethod("extract", signature=className("glm", "stats"), 
+    definition = extract.glm)
+
 
 # extension for gls objects
 extract.gls <- function(model) {
-  
-  if (!class(model) == "gls") {
-    stop("Internal error: Incorrect model type! Should be a gls object!")
-  }
-  
   tab <- summary(model)$tTable[,-3] #extract coefficient table
   
   lik <- summary(model)$logLik #extract log likelihood
@@ -61,34 +109,31 @@ extract.gls <- function(model) {
   return(table.content)
 }
 
+setMethod("extract", signature=className("gls", "nlme"), 
+    definition = extract.gls)
 
-# extension for glm objects
-extract.glm <- function(model) {
-  
-  if (!class(model)[1] == "glm") {
-    stop("Internal error: Incorrect model type! Should be a glm object!")
-  }
-  
+
+# extension for lm objects
+extract.lm <- function(model) {
   tab <- summary(model)$coef[,-3] #extract coefficient table
   
-  aic <- summary(model)$aic #extract AIC
+  rs <- summary(model)$r.squared #extract R-squared
+  adj <- summary(model)$adj.r.squared #extract adjusted R-squared
   n <- nobs(model) #extract number of observations
   
-  gof <- matrix(c(aic, n), ncol=1)
-  row.names(gof) <- c("AIC", "Num. obs.")
+  gof <- matrix(c(rs, adj, n), ncol=1)
+  row.names(gof) <- c("R$^2$", "Adj. R$^2$", "Num. obs.")
   
   table.content <- list(tab, gof)
   return(table.content)
 }
 
+setMethod("extract", signature=className("lm", "stats"), 
+    definition = extract.lm)
+
 
 # extension for lme objects
 extract.lme <- function(model) {
-  
-  if (!class(model) == "lme") {
-    stop("Internal error: Incorrect model type! Should be an lme object!")
-  }
-  
   tab <- summary(model)$tTable[,-3:-4] #extract coefficient table
   
   lik <- summary(model)$logLik #extract log likelihood
@@ -102,66 +147,137 @@ extract.lme <- function(model) {
   return(table.content)
 }
 
+setMethod("extract", signature=className("lme", "nlme"), 
+    definition = extract.lme)
 
-# extension for ergm objects
-extract.ergm <- function(model) {
+
+# extension for lrm objects (Design or rms package); submitted by Fabrice Le Lec
+extract.lrm <- function(model) {
+  tab <- model$coef #extract coefficient table
   
-  if (!class(model) == "ergm") {
-    stop("Internal error: Incorrect model type! Should be an ergm object!")
-  }
+  attributes(model$coef)$names <- lapply(attributes(model$coef)$names, 
+    function(x) gsub(">=", " $\\\\geq$ ", x))
   
-  tab <- summary(model)$coefs[,-3] #extract coefficient table
+  tab <- cbind(COEFEST = model$coef, SE = sqrt(diag(model$var)), 
+      PVALUES = pnorm(abs(model$coef/sqrt(diag(model$var))), 
+      lower.tail = FALSE)*2)
   
-  lik <- model$mle.lik[1] #extract log likelihood
-  aic <- summary(model)$aic #extract AIC
-  bic <- summary(model)$bic #extract BIC
-  gof <- matrix(c(aic, bic, lik), ncol=1)
-  row.names(gof) <- c("AIC", "BIC", "Log Likelihood")
+  pseudors <- model$stats[10] #extract pseudo R-squared
+  LR <- model$stats[3] #extract LR
+  n <- model$stats[1] #extract number of observations
+  gof <- matrix(c(pseudors, LR, n), ncol=1)
+  row.names(gof) <- c("Pseudo R$^2$", "L.R.", "Num. obs.")
+  
+  table.content <- list(tab, gof) #put coefficients and gofs in a list
+  return(table.content) #return the list object
+}
+
+setMethod("extract", signature=className("lrm", "rms"), 
+    definition = extract.lrm)
+setMethod("extract", signature=className("lrm", "Design"), 
+    definition = extract.lrm)
+
+
+# extension for plm objects (from the plm package); submitted by Lena Koerber
+extract.plm <- function(model) {
+  tab <- summary(model)$coef[,-3]
+  
+  rs <- summary(model)$r.squared
+  n <- length(summary(model)$resid)
+  gof <- matrix(c(rs, n), ncol=1)
+  row.names(gof) <- c("R$^2$", "Adj. R$^2$", "Num. obs.")
   
   table.content <- list(tab, gof)
   return(table.content)
 }
 
+setMethod("extract", signature=className("plm", "plm"), 
+    definition = extract.plm)
 
+
+# extension for pmg objects (from the plm package); submitted by Lena Koerber
+extract.pmg <- function(model) {
+  co <- data.matrix(summary(model)$coef)
+  se <- (diag(summary(model)$vcov))^(1/2) #standard errors
+  t <- co / se #t-statistics
+  n <- length(summary(model)$resid) #number of observations
+  d <- n - length(co) #degrees of freedom
+  pval <- 2 * pt(-abs(t), df=d)
+  tab <- cbind(co, se, pval) #coefficient table
+  
+  gof <- matrix(n, ncol=1)
+  row.names(gof) <- c("Num. obs.")
+  
+  table.content <- list(tab, gof)
+  return(table.content)
+}
+
+setMethod("extract", signature=className("pmg", "plm"), 
+    definition = extract.pmg)
+
+
+# extension for rq objects (quantreg package); submitted by Lena Koerber
+extract.rq <- function(model) {
+  tab <- summary(model, cov=TRUE)$coef[,-3]
+  n <- length(summary(model)$resid)
+  tau<-summary(model)$tau
+  gof <- matrix(c(n, tau), ncol=1)
+  row.names(gof) <- c("Num. obs.", "Percentile")
+  
+  table.content <- list(tab, gof)
+  return(table.content)
+}
+
+setMethod("extract", signature=className("rq", "quantreg"), 
+    definition = extract.rq)
+
+
+# extension for systemfit objects; submitted by Johannes Kutsam
+extract.systemfit <- function(model) {
+  equationList <- list()
+  for(eq in model$eq){  #go through estimated equations
+    sum <- summary(eq)  #extract model summary
+    tab <- coef(sum)[,-3]  #coefficients table for the equation
+    
+    rsquared <- sum$r.squared  #extract r-squared
+    radj <- sum$adj.r.squared  #extract adjusted r-squared
+    n <- nobs(model)  #extract number of observations
+    
+    gof <- matrix(c(rsquared, radj, n), ncol=1)  #GOF matrix
+    row.names(gof) <- c("R$^2$", "Adj. R$^2$", "Num. obs.")  #set GOF row names
+
+    table.content <- list(tab, gof)
+    equationList[[eq$eqnNo]] <- table.content
+  }
+  return(equationList)  #returns a list of table.content lists
+}
+
+setMethod("extract", signature=className("systemfit", "systemfit"), 
+    definition = extract.systemfit)
+
+
+# texreg function
 texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE, 
     table=TRUE, sideways=FALSE, float.pos="", strong.signif=FALSE, 
     symbol="\\cdot", use.packages=TRUE, caption="Statistical models", 
     label="table:coefficients", dcolumn=TRUE, booktabs=TRUE, scriptsize=FALSE, 
-    custom.names=NA, model.names=NA) {
+    custom.names=NA, model.names=NA, digits=2, ...) {
   
   string <- ""
   
   # if a single model is handed over, put model inside a list
-  # IMPLEMENT NEW EXTENSIONS HERE
-  if (class(l)[1] == "ergm" | class(l)[1] == "lme" | class(l)[1] == "lm" | 
-      class(l)[1] == "gls" | class(l)[1] == "glm") {
+  if (class(l) != "list") {
     l <- list(l)
-  } else if (class(l) != "list") {
-    stop("Unknown object was handed over.")
   }
-  
+
   # extract data from the models
-  # IMPLEMENT NEW EXTENSIONS HERE
   models <- NULL
   for (i in 1:length(l)) {
-    if (class(l[[i]])[1] == "ergm") {
-      model <- extract.ergm(l[[i]])
+    model <- extract(l[[i]], ...)
+    if (class(model[[1]]) == "list") {  #nested list of models (e.g. systemfit)
+      models <- append(models, model)
+    } else {  #normal case; one model
       models <- append(models, list(model))
-    } else if (class(l[[i]])[1] == "lme") {
-      model <- extract.lme(l[[i]])
-      models <- append(models, list(model))
-    } else if (class(l[[i]])[1] == "lm") {
-      model <- extract.lm(l[[i]])
-      models <- append(models, list(model))
-    } else if (class(l[[i]])[1] == "gls") {
-      model <- extract.gls(l[[i]])
-      models <- append(models, list(model))
-    } else if (class(l[[i]])[1] == "glm") {
-      model <- extract.glm(l[[i]])
-      models <- append(models, list(model))
-    } else {
-      warning(paste("Skipping unknown model of type ", class(l[[i]]), ".", 
-          sep=""))
     }
   }
   
@@ -183,7 +299,7 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     coefs <- append(coefs, models[[i]][1])
     for (j in 1:length(models[[i]][[2]])) {
       rn <- row.names(models[[i]][[2]])[j]
-      val <- models[[i]][[2]][j]
+      val <- models[[i]][[2]][[j]]
       col <- i
       row <- which(row.names(gofs) == rn)
       gofs[row,col] <- val
@@ -316,7 +432,8 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     gof.list <- as.vector(gofs[,i])
     gof.list.string <- NULL
     for (j in 1:length(gof.list)) {
-      gof.list.string[j] <- coef.to.string(gof.list[j], leading.zero)
+      gof.list.string[j] <- coeftostring(gof.list[j], leading.zero, 
+          digits=digits)
     }
     if (dcolumn == TRUE) {
       dec.left <- max(c(nchar(gof.list.string)-3), 3)
@@ -354,17 +471,17 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
   if (length(model.names) > 1) {
     if (class(model.names) != "character") {
       stop("Model names must be specified as a vector of strings.")
-    } else if (length(model.names) != length(l)) {
-      stop(paste("There are", length(l), "models, but you provided", 
+    } else if (length(model.names) != length(models)) {
+      stop(paste("There are", length(models), "models, but you provided", 
           length(model.names), "names for them."))
     } else {
       if (dcolumn == TRUE) {
-        for (i in 1:length(l)) {
+        for (i in 1:length(models)) {
           string <- paste(string, " & \\multicolumn{1}{c}{", model.names[i], 
               "}", sep="")
         }
       } else {
-        for (i in 1:length(l)) {
+        for (i in 1:length(models)) {
           string <- paste(string, " & ", model.names[i], sep="")
         }
       }
@@ -372,9 +489,9 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
   } else if (!is.na(model.names) & class(model.names) != "character") {
     stop("Model names must be specified as a vector of strings.")
   } else if (class(model.names) == "character" & 
-      length(model.names) != length(l)) {
+      length(model.names) != length(models)) {
     stop(paste("A single model name was specified. But there are in fact", 
-        length(l), "models."))
+        length(models), "models."))
   } else if (class(model.names) == "character") {
     if (dcolumn == TRUE) {
       string <- paste(string, " & \\multicolumn{1}{c}{", model.names, "}", 
@@ -384,11 +501,11 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     }
   } else {
     if (dcolumn == TRUE) {
-      for (i in 1:length(l)) {
+      for (i in 1:length(models)) {
         string <- paste(string, " & \\multicolumn{1}{c}{Model ", i, "}", sep="")
       }
     } else {
-      for (i in 1:length(l)) {
+      for (i in 1:length(models)) {
         string <- paste(string, " & Model ", i, sep="")
       }
     }
@@ -420,8 +537,8 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
         } else if (m[i,j] == -Inf) {
           output.matrix[i,k] <- "-Inf (NA)"
         } else {
-          std <- paste(" \\; (", coef.to.string(m[i,j+1], leading.zero), ")", 
-              sep="")
+          std <- paste(" \\; (", coeftostring(m[i,j+1], leading.zero, 
+              digits=digits), ")", sep="")
           if (strong.signif == TRUE) {
             if (m[i,j+2] <= 0.001) {
               p <- "^{***}"
@@ -450,8 +567,8 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
           } else {
             dollar <- "$"
           }
-          entry <- paste(dollar, coef.to.string(m[i,j], leading.zero), std, p, 
-              dollar, sep="")
+          entry <- paste(dollar, coeftostring(m[i,j], leading.zero, 
+              digits=digits), std, p, dollar, sep="")
           output.matrix[i,k] <- entry
           
         }
@@ -508,10 +625,10 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
           } else {
             dollar <- "$"
           }
-          output.matrix[(i*2)-1,k] <- paste(dollar, coef.to.string(m[i,j], 
-              leading.zero), p, dollar, sep="")
-          output.matrix[(i*2),k] <- paste(dollar, "(", coef.to.string(m[i,j+1], 
-              leading.zero), ")", dollar, sep="")
+          output.matrix[(i*2)-1,k] <- paste(dollar, coeftostring(m[i,j], 
+              leading.zero, digits=digits), p, dollar, sep="")
+          output.matrix[(i*2),k] <- paste(dollar, "(", coeftostring(m[i,j+1], 
+              leading.zero, digits=digits), ")", dollar, sep="")
         }
         k <- k+1
         j <- j+3
@@ -529,7 +646,7 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
   for (i in 1:length(gofs[,1])) {
     gof.matrix[i,1] <- rownames(gofs)[i]
     for (j in 1:length(gofs[1,])) {
-      strg <- coef.to.string(gofs[i,j], leading.zero)
+      strg <- coeftostring(gofs[i,j], leading.zero, digits=digits)
       rn <- rownames(gofs)[i]
       if (rn == "Num. obs." | rn == "n" | rn == "N" | rn == "N obs" | 
           rn == "N obs." | rn == "nobs" | rn == "n obs" | rn == "n obs." | 
@@ -541,8 +658,13 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
           rn == "Number Obs." | rn == "Number obs" | rn == "Number Obs" | 
           rn == "Number of Obs." | rn == "Number of obs." | 
           rn == "Number of obs" | rn == "Number of Obs" | rn == "Obs" | 
-          rn == "obs" | rn == "Obs." | rn == "obs.") {
-        strg <- substring(strg, 1, nchar(strg)-3)
+          rn == "obs" | rn == "Obs." | rn == "obs." | rn == "Events" | 
+          rn == "# Events" | rn == "# events" | rn == "events" | 
+          rn == "Missings" | rn == "Missing" | rn == "# Missing") {
+        strg <- strsplit(strg, "\\.")[[1]][1]
+        if (is.na(strg) == TRUE) {
+          strg <- ""
+        }
       }
       gof.matrix[i,j+1] <- paste(dollar, strg, dollar, sep="")
     }
@@ -611,14 +733,15 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
   string <- paste(string, "\\vspace{-2mm}\\\\\n", sep="")
   
   if (strong.signif == TRUE) {
-    string <- paste(string, "\\multicolumn{", length(l)+1, 
+    string <- paste(string, "\\multicolumn{", length(models)+1, 
         "}{l}{\\textsuperscript{***}$p<0.001$, ", 
         "\\textsuperscript{**}$p<0.01$, \\textsuperscript{*}$p<0.05$, ", 
         "\\textsuperscript{$", symbol, "$}$p<0.1$}\n", sep="")
   } else {
-    string <- paste(string, "\\multicolumn{", length(l)+1, 
+    string <- paste(string, "\\multicolumn{", length(models)+1, 
         "}{l}{\\textsuperscript{***}$p<0.01$, ", 
-        "\\textsuperscript{**}$p<0.05$, \\textsuperscript{*}$p<0.1$}\n", sep="")
+        "\\textsuperscript{**}$p<0.05$, \\textsuperscript{*}$p<0.1$}\n", 
+        sep="")
   }
   
   string <- paste(string, "\\end{tabular}\n", sep="")
