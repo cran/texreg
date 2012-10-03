@@ -1,6 +1,6 @@
 Package: texreg
-Version: 1.02
-Date: 2012-06-21
+Version: 1.06
+Date: 2012-10-03
 Title: Conversion of R regression output to LaTeX tables.
 Author: Philip Leifeld
 Maintainer: Philip Leifeld <philip.leifeld@eawag.ch>
@@ -8,13 +8,13 @@ Description: texreg converts coefficients, standard errors,
         significance stars, and goodness-of-fit statistics of
         statistical models into LaTeX tables. Either a single model or
         a list of models can be combined in a single table. The output
-        is customizable. lm, lme, gls, glm and ergm objects are
-        currently supported. New model types can be easily implemented.
-Depends: R (>= 2.7.0)
+        is customizable. New model types can be easily implemented.
 Suggests: ergm, network, nlme
+Depends: R (>= 2.7.0), methods
 License: GPL-3
 Repository: CRAN
 Repository/R-Forge/Project: texreg
-Repository/R-Forge/Revision: 23
-Packaged: 2012-06-21 10:15:51 UTC; rforge
-Date/Publication: 2012-06-21 12:18:19
+Repository/R-Forge/Revision: 37
+Repository/R-Forge/DateTimeStamp: 2012-10-03 02:26:39
+Date/Publication: 2012-10-03 10:12:12
+Packaged: 2012-10-03 06:21:13 UTC; rforge
