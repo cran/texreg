@@ -59,7 +59,7 @@ extract.clm <- function(model, include.thresholds=TRUE, include.aic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -114,17 +114,17 @@ extract.coxph <- function(model, include.aic=TRUE, include.rsquared=FALSE,
   }
   if (include.maxrs==TRUE) {
     gof <- c(gof, maxrs)
-    gof.names <- c(gof.names, "Max. R$^2$")
+    gof.names <- c(gof.names, "Max.\ R$^2$")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.events==TRUE) {
     gof <- c(gof, event)
-    gof.names <- c(gof.names, "Num. events")
+    gof.names <- c(gof.names, "Num.\ events")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.missings==TRUE) {
@@ -228,7 +228,7 @@ extract.gee <- function(model, robust=TRUE, include.dispersion=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -287,7 +287,7 @@ extract.glm <- function(model, include.aic=TRUE, include.bic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -313,6 +313,7 @@ setMethod("extract", signature=className("Relogit", "Zelig"),
 extract.negbin <- extract.glm
 setMethod("extract", signature=className("negbin", "MASS"), 
     definition = extract.negbin)
+
 
 # extension for gls objects
 extract.gls <- function(model, include.aic=TRUE, include.bic=TRUE, 
@@ -347,7 +348,7 @@ extract.gls <- function(model, include.aic=TRUE, include.bic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -389,12 +390,12 @@ extract.lm <- function(model, include.rsquared=TRUE, include.adjrs=TRUE,
   }
   if (include.adjrs==TRUE) {
     gof <- c(gof, adj)
-    gof.names <- c(gof.names, "Adj. R$^2$")
+    gof.names <- c(gof.names, "Adj.\ R$^2$")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -447,7 +448,7 @@ extract.lme <- function(model, include.aic=TRUE, include.bic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -523,7 +524,7 @@ extract.lmerMod <- function(model, include.pvalues=FALSE, include.aic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.groups==TRUE) {
@@ -572,6 +573,41 @@ setMethod("extract", signature=className("nlmerMod", "lme4"),
     definition = extract.nlmerMod)
 
 
+# extension for lmrob objects (robustbase package)
+extract.lmrob <- function(model, include.nobs = TRUE) {
+
+  names <- rownames(summary(model)$coef)
+  co <- summary(model)$coef[,1]
+  se <- summary(model)$coef[,2]
+  pval <- summary(model)$coef[,4]
+  
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  
+  if (include.nobs == TRUE) {
+    n <- length(model$residuals)
+    gof <- c(gof, n)
+    gof.names <- c(gof.names, "Num.\ obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  
+  tr <- createTexreg(
+    coef.names = names, 
+    coef = co, 
+    se = se,
+    pvalues = pval, 
+    gof.names = gof.names, 
+    gof = gof, 
+    gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature=className("lmrob", "robustbase"), 
+    definition = extract.lmrob)
+
+
 # extension for lnam objects (sna package)
 extract.lnam <- function(model, include.rsquared=TRUE, include.adjrs=TRUE, 
     include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE) {
@@ -599,7 +635,7 @@ extract.lnam <- function(model, include.rsquared=TRUE, include.adjrs=TRUE,
   }
   if (include.adjrs==TRUE) {
     gof <- c(gof, adj.rsquared)
-    gof.names <- c(gof.names, "Adj. R$^2$")
+    gof.names <- c(gof.names, "Adj.\ R$^2$")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.aic==TRUE) {
@@ -664,7 +700,7 @@ extract.lrm <- function(model, include.pseudors=TRUE, include.lr=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -741,7 +777,7 @@ extract.mer <- function(model, include.pvalues=FALSE, include.aic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.groups==TRUE) {
@@ -804,12 +840,12 @@ extract.plm <- function(model, include.rsquared=TRUE, include.adjrs=TRUE,
   }
   if (include.adjrs==TRUE) {
     gof <- c(gof, adj)
-    gof.names <- c(gof.names, "Adj. R$^2$")
+    gof.names <- c(gof.names, "Adj.\ R$^2$")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -845,7 +881,7 @@ extract.pmg <- function(model, include.nobs=TRUE) {
   gof.decimal <- logical()
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -929,7 +965,7 @@ extract.polr <- function(model, include.thresholds=TRUE, include.aic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -949,6 +985,38 @@ setMethod("extract", signature=className("polr", "MASS"),
     definition = extract.polr)
 
 
+# extension for rlm objects (MASS package)
+extract.rlm <- function (model, include.nobs=TRUE) {
+  
+  names <- rownames(summary(model)$coef)
+  co <- summary(model)$coef[,1]
+  se <- summary(model)$coef[,2]
+  
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (include.nobs == TRUE) {
+    n <- nobs(model)
+    gof <- c(gof, n)
+    gof.names <- c(gof.names, "Num.\ obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  
+  tr <- createTexreg(
+    coef.names = names, 
+    coef = co, 
+    se = se, 
+    gof.names = gof.names, 
+    gof = gof, 
+    gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature=className("rlm", "MASS"), 
+    definition = extract.rlm)
+
+
 # extension for rq objects (quantreg package)
 extract.rq <- function(model, include.nobs=TRUE, include.percentile=TRUE) {
   co <- summary(model, cov=TRUE)$coef[,1]
@@ -964,7 +1032,7 @@ extract.rq <- function(model, include.nobs=TRUE, include.percentile=TRUE) {
   gof.decimal <- logical()
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.percentile==TRUE) {
@@ -1009,7 +1077,7 @@ extract.simex <- function(model, jackknife=TRUE, include.nobs=TRUE) {
   if (include.nobs==TRUE) {
     n <- length(model$model$residuals)
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -1030,46 +1098,163 @@ setMethod("extract", signature=className("simex", "simex"),
 
 
 # extension for stergm objects (tergm package)
-extract.stergm <- function(model, include.formation=TRUE, 
-    include.dissolution=TRUE, include.nvertices=TRUE) {
+extract.stergm <- function(model, beside=FALSE, include.formation=TRUE, 
+    include.dissolution=TRUE, include.nvertices=TRUE, include.aic=FALSE, 
+    include.bic=FALSE, include.loglik=FALSE) {
   
-  co <- numeric()
-  se <- numeric()
-  names <- character()
-  pval <- numeric()
-  if (include.formation==TRUE) {
-    names <- paste("Formation:", rownames(summary(model)$formation$coefs))
-    co <- summary(model)$formation$coefs[,1]
-    se <- summary(model)$formation$coefs[,2]
-    pval <- summary(model)$formation$coefs[,4]
+  if (beside==FALSE) {
+    co <- numeric()
+    se <- numeric()
+    names <- character()
+    pval <- numeric()
+    if (include.formation==TRUE) {
+      names <- paste("Formation:", rownames(summary(model)$formation$coefs))
+      co <- summary(model)$formation$coefs[,1]
+      se <- summary(model)$formation$coefs[,2]
+      pval <- summary(model)$formation$coefs[,4]
+    }
+    if (include.dissolution==TRUE) {
+      names <- c(names, paste("Dissolution:", 
+          rownames(summary(model)$dissolution$coefs)))
+      co <- c(co, summary(model)$dissolution$coefs[,1])
+      se <- c(se, summary(model)$dissolution$coefs[,2])
+      pval <- c(pval, summary(model)$dissolution$coefs[,4])
+    }
+    
+    gof <- numeric()
+    gof.names <- character()
+    gof.decimal <- logical()
+    if (include.nvertices==TRUE) {
+      nvertices <- model$formation.fit$network$gal$n
+      gof <- c(gof, nvertices)
+      gof.names <- c(gof.names, "Num.\ vertices")
+      gof.decimal <- c(gof.decimal, FALSE)
+    }
+    if (include.aic==TRUE) {
+      aic.dis <- summary(model)$dissolution$aic
+      aic.form <- summary(model)$formation$aic
+      gof <- c(gof, aic.form, aic.dis)
+      gof.names <- c(gof.names, "Formation: AIC", "Dissolution: AIC")
+      gof.decimal <- c(gof.decimal, TRUE, TRUE)
+    }
+    if (include.bic==TRUE) {
+      bic.dis <- summary(model)$dissolution$bic
+      bic.form <- summary(model)$formation$bic
+      gof <- c(gof, bic.form, bic.dis)
+      gof.names <- c(gof.names, "Formation: BIC", "Dissolution: BIC")
+      gof.decimal <- c(gof.decimal, TRUE, TRUE)
+    }
+    if (include.loglik==TRUE) {
+      lik <- logLik(model)[1]
+      gof <- c(gof, lik)
+      gof.names <- c(gof.names, "Log Likelihood")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    
+    tr <- createTexreg(
+        coef.names=names, 
+        coef=co, 
+        se=se, 
+        pvalues=pval, 
+        gof.names=gof.names, 
+        gof=gof, 
+        gof.decimal=gof.decimal
+    )
+    
+    return(tr)
+  } else {
+    trList <- list()
+    
+    co <- numeric()
+    se <- numeric()
+    names <- character()
+    pval <- numeric()
+    if (include.formation==TRUE) {
+      f.names <- rownames(summary(model)$formation$coefs)
+      f.co <- summary(model)$formation$coefs[,1]
+      f.se <- summary(model)$formation$coefs[,2]
+      f.pval <- summary(model)$formation$coefs[,4]
+    }
+    if (include.dissolution==TRUE) {
+      d.names <- rownames(summary(model)$dissolution$coefs)
+      d.co <- summary(model)$dissolution$coefs[,1]
+      d.se <- summary(model)$dissolution$coefs[,2]
+      d.pval <- summary(model)$dissolution$coefs[,4]
+    }
+    
+    f.gof <- numeric()
+    f.gof.names <- character()
+    f.gof.decimal <- logical()
+    d.gof <- numeric()
+    d.gof.names <- character()
+    d.gof.decimal <- logical()
+    if (include.nvertices==TRUE) {
+      nvertices <- model$formation.fit$network$gal$n
+      f.gof <- c(f.gof, nvertices)
+      f.gof.names <- c(f.gof.names, "Num.\ vertices")
+      f.gof.decimal <- c(f.gof.decimal, FALSE)
+      d.gof <- c(d.gof, nvertices)
+      d.gof.names <- c(d.gof.names, "Num.\ vertices")
+      d.gof.decimal <- c(d.gof.decimal, FALSE)
+    }
+    if (include.aic==TRUE) {
+      f.aic <- summary(model)$formation$aic
+      f.gof <- c(f.gof, f.aic)
+      f.gof.names <- c(f.gof.names, "AIC")
+      f.gof.decimal <- c(f.gof.decimal, TRUE)
+      d.aic <- summary(model)$dissolution$aic
+      d.gof <- c(d.gof, d.aic)
+      d.gof.names <- c(d.gof.names, "AIC")
+      d.gof.decimal <- c(d.gof.decimal, TRUE)
+    }
+    if (include.bic==TRUE) {
+      f.bic <- summary(model)$formation$bic
+      f.gof <- c(f.gof, f.bic)
+      f.gof.names <- c(f.gof.names, "BIC")
+      f.gof.decimal <- c(f.gof.decimal, TRUE)
+      d.bic <- summary(model)$dissolution$bic
+      d.gof <- c(d.gof, d.bic)
+      d.gof.names <- c(d.gof.names, "BIC")
+      d.gof.decimal <- c(d.gof.decimal, TRUE)
+    }
+    if (include.loglik==TRUE) {
+      lik <- logLik(model)[1]
+      f.gof <- c(f.gof, lik)
+      f.gof.names <- c(f.gof.names, "Log Likelihood")
+      f.gof.decimal <- c(f.gof.decimal, TRUE)
+      d.gof <- c(d.gof, lik)
+      d.gof.names <- c(d.gof.names, "Log Likelihood")
+      d.gof.decimal <- c(d.gof.decimal, TRUE)
+    }
+    
+    if (include.formation==TRUE) {
+      tr <- createTexreg(
+          coef.names=f.names, 
+          coef=f.co, 
+          se=f.se, 
+          pvalues=f.pval, 
+          gof.names=f.gof.names, 
+          gof=f.gof, 
+          gof.decimal=f.gof.decimal
+      )
+      trList[[length(trList)+1]] <- tr
+    }
+    
+    if (include.dissolution==TRUE) {
+      tr <- createTexreg(
+          coef.names=d.names, 
+          coef=d.co, 
+          se=d.se, 
+          pvalues=d.pval, 
+          gof.names=d.gof.names, 
+          gof=d.gof, 
+          gof.decimal=d.gof.decimal
+      )
+      trList[[length(trList)+1]] <- tr
+    }
+    
+    return(trList)
   }
-  if (include.dissolution==TRUE) {
-    names <- c(names, paste("Dissolution:", rownames(summary(model)$dissolution$coefs)))
-    co <- c(co, summary(model)$dissolution$coefs[,1])
-    se <- c(se, summary(model)$dissolution$coefs[,2])
-    pval <- c(pval, summary(model)$dissolution$coefs[,4])
-  }
-  
-  gof <- numeric()
-  gof.names <- character()
-  gof.decimal <- logical()
-  if (include.nvertices==TRUE) {
-    nvertices <- model$formation.fit$network$gal$n
-    gof <- c(gof, nvertices)
-    gof.names <- c(gof.names, "Num. vertices")
-    gof.decimal <- c(gof.decimal, FALSE)
-  }
-  
-  tr <- createTexreg(
-      coef.names=names, 
-      coef=co, 
-      se=se, 
-      pvalues=pval, 
-      gof.names=gof.names, 
-      gof=gof, 
-      gof.decimal=gof.decimal
-  )
-  return(tr)
 }
 
 setMethod("extract", signature=className("stergm", "tergm"), 
@@ -1134,7 +1319,7 @@ extract.svyglm <- function(model, include.aic=FALSE, include.bic=FALSE,
   if (include.nobs==TRUE) {
     n <- nobs(model)
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   
@@ -1179,12 +1364,12 @@ extract.systemfit <- function(model, include.rsquared=TRUE, include.adjrs=TRUE,
     }
     if (include.adjrs==TRUE) {
       gof <- c(gof, adj)
-      gof.names <- c(gof.names, "Adj. R$^2$")
+      gof.names <- c(gof.names, "Adj.\ R$^2$")
       gof.decimal <- c(gof.decimal, TRUE)
     }
     if (include.nobs==TRUE) {
       gof <- c(gof, n)
-      gof.names <- c(gof.names, "Num. obs.")
+      gof.names <- c(gof.names, "Num.\ obs.")
       gof.decimal <- c(gof.decimal, FALSE)
     }
     
@@ -1250,7 +1435,7 @@ extract.tobit <- function(model, include.aic=TRUE, include.bic=TRUE,
   }
   if (include.nobs==TRUE) {
     gof <- c(gof, n)
-    gof.names <- c(gof.names, "Num. obs.")
+    gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.censnobs==TRUE) {
