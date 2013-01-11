@@ -3,6 +3,7 @@
 \alias{extract.clm}
 \alias{extract.clogit}
 \alias{extract.coxph}
+\alias{extract.coxph.penal}
 \alias{extract.ergm}
 \alias{extract.gee}
 \alias{extract.glm}
@@ -34,61 +35,68 @@
 \usage{
 extract(model, ...)
 extract.clm(model, include.thresholds=TRUE, include.aic=TRUE, include.bic=TRUE, 
-    include.loglik=TRUE, include.nobs=TRUE)
-extract.clogit(model, include.aic=TRUE, include.rsquared=FALSE, 
-    include.maxrs=FALSE, include.events=TRUE, include.nobs=TRUE, 
-    include.missings=TRUE)
-extract.coxph(model, include.aic=TRUE, include.rsquared=FALSE, 
-    include.maxrs=FALSE, include.events=TRUE, include.nobs=TRUE, 
-    include.missings=TRUE)
-extract.ergm(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE)
-extract.gee(model, robust=TRUE, include.dispersion=TRUE, include.nobs=TRUE)
+    include.loglik=TRUE, include.nobs=TRUE, ...)
+extract.clogit(model, include.aic=TRUE, include.rsquared=TRUE, 
+    include.maxrs=TRUE, include.events=TRUE, include.nobs=TRUE, 
+    include.missings=TRUE, ...)
+extract.coxph(model, include.aic=TRUE, include.rsquared=TRUE, 
+    include.maxrs=TRUE, include.events=TRUE, include.nobs=TRUE, 
+    include.missings=TRUE, include.zph=TRUE, ...)
+extract.coxph.penal(model, include.aic=TRUE, include.rsquared=TRUE, 
+    include.maxrs=TRUE, include.events=TRUE, include.nobs=TRUE, 
+    include.missings=TRUE, include.zph=TRUE, ...)
+extract.ergm(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
+    ...)
+extract.gee(model, robust=TRUE, include.dispersion=TRUE, include.nobs=TRUE, ...)
 extract.glm(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
-    include.deviance=TRUE, include.nobs=TRUE)
+    include.deviance=TRUE, include.nobs=TRUE, ...)
 extract.glmerMod(model, include.pvalues=FALSE, include.aic=TRUE, 
     include.bic=TRUE, include.loglik=TRUE, include.deviance=TRUE, 
-    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE)
+    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE, ...)
 extract.gls(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
-    include.nobs=TRUE)
-extract.lm(model, include.rsquared=TRUE, include.adjrs=TRUE, include.nobs=TRUE)
+    include.nobs=TRUE, ...)
+extract.lm(model, include.rsquared=TRUE, include.adjrs=TRUE, include.nobs=TRUE, 
+    ...)
 extract.lme(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
-    include.nobs=TRUE)
+    include.nobs=TRUE, ...)
 extract.lmerMod(model, include.pvalues=FALSE, include.aic=TRUE, 
     include.bic=TRUE, include.loglik=TRUE, include.deviance=TRUE, 
-    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE)
-extract.lmrob(model, include.nobs=TRUE)
+    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE, ...)
+extract.lmrob(model, include.nobs=TRUE, ...)
 extract.lnam(model, include.rsquared=TRUE, include.adjrs=TRUE, 
-    include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE)
-extract.lrm(model, include.pseudors=TRUE, include.lr=TRUE, include.nobs=TRUE)
+    include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, ...)
+extract.lrm(model, include.pseudors=TRUE, include.lr=TRUE, include.nobs=TRUE, 
+    ...)
 extract.mer(model, include.pvalues=FALSE, include.aic=TRUE, 
     include.bic=TRUE, include.loglik=TRUE, include.deviance=TRUE, 
-    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE)
+    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE, ...)
 extract.negbin(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
-    include.deviance=TRUE, include.nobs=TRUE)
+    include.deviance=TRUE, include.nobs=TRUE, ...)
 extract.nlmerMod(model, include.pvalues=FALSE, include.aic=TRUE, 
     include.bic=TRUE, include.loglik=TRUE, include.deviance=TRUE, 
-    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE)
-extract.plm(model, include.rsquared=TRUE, include.adjrs=TRUE, include.nobs=TRUE)
-extract.pmg(model, include.nobs=TRUE)
+    include.nobs=TRUE, include.groups=TRUE, include.variance=TRUE, ...)
+extract.plm(model, include.rsquared=TRUE, include.adjrs=TRUE, 
+    include.nobs=TRUE, ...)
+extract.pmg(model, include.nobs=TRUE, ...)
 extract.polr(model, include.thresholds=TRUE, include.aic=TRUE, include.bic=TRUE,
-    include.loglik=TRUE, include.deviance=TRUE, include.nobs=TRUE)
+    include.loglik=TRUE, include.deviance=TRUE, include.nobs=TRUE, ...)
 extract.Relogit(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
-    include.deviance=TRUE, include.nobs=TRUE)
-extract.rlm(model, include.nobs=TRUE)
-extract.rq(model, include.nobs=TRUE, include.percentile=TRUE)
+    include.deviance=TRUE, include.nobs=TRUE, ...)
+extract.rlm(model, include.nobs=TRUE, ...)
+extract.rq(model, include.nobs=TRUE, include.percentile=TRUE, ...)
 extract.sclm(model, include.thresholds=TRUE, include.aic=TRUE, include.bic=TRUE,
-    include.loglik=TRUE, include.nobs=TRUE)
-extract.simex(model, jackknife=TRUE, include.nobs=TRUE)
+    include.loglik=TRUE, include.nobs=TRUE, ...)
+extract.simex(model, jackknife=TRUE, include.nobs=TRUE, ...)
 extract.stergm(model, beside=FALSE, include.formation=TRUE, 
     include.dissolution=TRUE, include.nvertices=TRUE, include.aic=FALSE, 
-    include.bic=FALSE, include.loglik=FALSE)
+    include.bic=FALSE, include.loglik=FALSE, ...)
 extract.svyglm(model, include.aic=FALSE, include.bic=FALSE, include.loglik=FALSE,
-    include.deviance=TRUE, include.dispersion=TRUE, include.nobs=TRUE)
+    include.deviance=TRUE, include.dispersion=TRUE, include.nobs=TRUE, ...)
 extract.systemfit(model, include.rsquared=TRUE, include.adjrs=TRUE, 
-    include.nobs=TRUE)
+    include.nobs=TRUE, ...)
 extract.tobit(model, include.aic=TRUE, include.bic=TRUE, include.loglik=TRUE, 
     include.deviance=TRUE, include.nobs=FALSE, include.censnobs=TRUE, 
-    include.wald=TRUE)
+    include.wald=TRUE, ...)
 }
 \details{
 extract() is a generic function which extracts coefficients and GOF measures from 
@@ -126,6 +134,7 @@ to convert them into texreg objects.
 \item{include.thresholds}{ If available: should the threshold parameters (that is, the intercepts for the class boundaries) be reported in ordinal models? }
 \item{include.variance}{ If available: should group variances be reported? }
 \item{include.wald}{ If available: should the Wald statistic be included? }
+\item{include.zph}{ If available: should the Cox proportional hazards assumption be tested (resulting in a p value indicating whether the proportional hazards assumption of the model is violated)? }
 \item{jackknife}{ If available: use Jackknife variance instead of Asymptotic variance. }
 \item{robust}{ If available: report robust instead of native standard errors. }
 \item{...}{ Custom parameters. }
