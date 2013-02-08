@@ -528,6 +528,56 @@ setMethod("extract", signature=className("gls", "nlme"),
     definition = extract.gls)
 
 
+# extension for gmm objects
+extract.gmm <- function(model, include.obj.fcn=TRUE, 
+    include.overidentification=FALSE, include.nobs=TRUE, ...) {
+  
+  s <- summary(model, ...)
+  
+  coefs <- s$coefficients
+  names <- rownames(coefs)
+  coef <- coefs[,1]
+  se <- coefs[,2]
+  pval <- coefs[,4]
+  
+  n <- model$n #number of observations
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (include.obj.fcn == TRUE) {
+    obj.fcn <- model$objective * 10^5 #the value of the objective function
+    gof <- c(gof, obj.fcn)
+    gof.names <- c(gof.names, "Criterion function")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.overidentification == TRUE) {
+    jtest <- s$stest$test[1]
+    gof <- c(gof, jtest)
+    gof.names <- c(gof.names, "J-Test")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.nobs == TRUE) {
+    gof <- c(gof, n)
+    gof.names <- c(gof.names, "Num.\\ obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  
+  tr <- createTexreg(
+    coef.names=names, 
+    coef=coef, 
+    se=se, 
+    pvalues=pval, 
+    gof.names=gof.names, 
+    gof=gof, 
+    gof.decimal=gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature=className("gmm", "gmm"), 
+    definition = extract.gmm)
+
+
 # extension for lm objects
 extract.lm <- function(model, include.rsquared=TRUE, include.adjrs=TRUE, 
     include.nobs=TRUE, ...) {
@@ -1071,7 +1121,7 @@ setMethod("extract", signature=className("pmg", "plm"),
 
 
 # extension for polr objects (MASS package)
-extract.polr <- function(model, include.thresholds=TRUE, include.aic=TRUE, 
+extract.polr <- function(model, include.thresholds=FALSE, include.aic=TRUE, 
     include.bic=TRUE, include.loglik=TRUE, include.deviance=TRUE, 
     include.nobs=TRUE, ...) {
   s <- summary(model, ...)
