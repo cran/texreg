@@ -2,12 +2,14 @@
 # Please use the forum at http://r-forge.r-project.org/projects/texreg/ 
 # for bug reports, help or feature requests.
 
+
 # screenreg function
 screenreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE, 
-    strong.signif=FALSE, custom.names=NA, model.names=NA, digits=2, 
-    outer.rule="=", inner.rule="-", column.spacing=2, override.coef=0, 
-    override.se=0, override.pval=0, omit.coef=NA, file=NA, return.string=FALSE, 
-    ...) {
+    strong.signif=FALSE, custom.names=NULL, custom.gof.names=NULL, 
+    model.names=NULL, digits=2, outer.rule="=", inner.rule="-", 
+    column.spacing=2, override.coef=0, override.se=0, override.pval=0, 
+    omit.coef=NA, reorder.coef=NULL, reorder.gof=NULL, file=NA, 
+    return.string=FALSE, ...) {
   
   models <- get.data(l, ...) #extract relevant coefficients, SEs, GOFs, etc.
   models <- override(models, override.coef, override.se, override.pval)
@@ -15,10 +17,12 @@ screenreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
   gof.names <- get.gof(models) #extract names of GOFs
   
   # arrange coefficients and GOFs nicely in a matrix
-  gofs <- aggregate.matrix(models, gof.names, digits, returnobject="gofs")
-  m <- aggregate.matrix(models, gof.names, digits, returnobject="m")
-  decimal.matrix <- aggregate.matrix(models, gof.names, digits, 
-      returnobject="decimal.matrix")
+  gofs <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
+      returnobject="gofs")
+  m <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
+      returnobject="m")
+  decimal.matrix <- aggregate.matrix(models, gof.names, custom.gof.names, 
+      digits, returnobject="decimal.matrix")
   
   m <- customnames(m, custom.names) #rename coefficients
   m <- rearrangeMatrix(m) #resort matrix and conflate duplicate entries
@@ -27,10 +31,16 @@ screenreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
   
   modnames <- modelnames(models, model.names) #use (custom) model names
   
+  # reorder GOF and coef matrix
+  m <- reorder(m, reorder.coef)
+  gofs <- reorder(gofs, reorder.gof)
+  decimal.matrix <- reorder(decimal.matrix, reorder.gof)
+  
   # create output table with significance stars etc.
   output.matrix <- outputmatrix(m, single.row, neginfstring="-Inf", 
       leading.zero, digits, se.prefix=" (", se.suffix=")", star.prefix=" ", 
-      star.suffix="", strong.signif, stars, dcolumn=TRUE, symbol=".")
+      star.suffix="", star.char="*", strong.signif, stars, dcolumn=TRUE, 
+      symbol=".")
   
   # create GOF matrix (the lower part of the final output matrix)
   gof.matrix <- gofmatrix(gofs, decimal.matrix, dcolumn=TRUE, leading.zero, 
@@ -154,18 +164,22 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     table=TRUE, sideways=FALSE, float.pos="", stars=TRUE, strong.signif=FALSE, 
     symbol="\\cdot", use.packages=TRUE, caption="Statistical models", 
     label="table:coefficients", dcolumn=TRUE, booktabs=TRUE, scriptsize=FALSE, 
-    custom.names=NA, model.names=NA, digits=2, override.coef=0, override.se=0, 
-    override.pval=0, omit.coef=NA, file=NA, return.string=FALSE, ...) {
+    custom.names=NULL, custom.gof.names=NULL, model.names=NULL, digits=2, 
+    override.coef=0, override.se=0, override.pval=0, omit.coef=NA, 
+    reorder.coef=NULL, reorder.gof=NULL, file=NA, return.string=FALSE, 
+    caption.above=FALSE, ...) {
   
   models <- get.data(l, ...) #extract relevant coefficients, SEs, GOFs, etc.
   gof.names <- get.gof(models) #extract names of GOFs
   models <- override(models, override.coef, override.se, override.pval)
   
   # arrange coefficients and GOFs nicely in a matrix
-  gofs <- aggregate.matrix(models, gof.names, digits, returnobject="gofs")
-  m <- aggregate.matrix(models, gof.names, digits, returnobject="m")
-  decimal.matrix <- aggregate.matrix(models, gof.names, digits, 
-      returnobject="decimal.matrix")
+  gofs <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
+      returnobject="gofs")
+  m <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
+      returnobject="m")
+  decimal.matrix <- aggregate.matrix(models, gof.names, custom.gof.names, 
+      digits, returnobject="decimal.matrix")
   
   m <- customnames(m, custom.names) #rename coefficients
   m <- rearrangeMatrix(m) #resort matrix and conflate duplicate entries
@@ -173,6 +187,11 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
   m <- omitcoef(m, omit.coef) #remove coefficient rows matching regex
   
   modnames <- modelnames(models, model.names) #use (custom) model names
+  
+  # reorder GOF and coef matrix
+  m <- reorder(m, reorder.coef)
+  gofs <- reorder(gofs, reorder.gof)
+  decimal.matrix <- reorder(decimal.matrix, reorder.gof)
   
   # what is the optimal length of the labels?
   lab.list <- c(rownames(m), gof.names)
@@ -209,6 +228,9 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     } else {
       string <- paste(string, "\\begin{", t, "table}[", float.pos, "]\n", 
           sep="")
+    }
+    if (caption.above == TRUE) {
+      string <- paste(string, "\\caption{", caption, "}\n", sep="")
     }
     string <- paste(string, "\\begin{center}\n", sep="")
     if (scriptsize == TRUE) {
@@ -281,7 +303,7 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
   output.matrix <- outputmatrix(m, single.row, 
       neginfstring="\\multicolumn{1}{c}{$-$Inf}", leading.zero, digits, 
       se.prefix=" \\; (", se.suffix=")", star.prefix="^{", star.suffix="}", 
-      strong.signif, stars, dcolumn=dcolumn, symbol)
+      star.char="*", strong.signif, stars, dcolumn=dcolumn, symbol)
   
   # create GOF matrix (the lower part of the final output matrix)
   gof.matrix <- gofmatrix(gofs, decimal.matrix, dcolumn=TRUE, leading.zero, 
@@ -366,9 +388,11 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     if (scriptsize == TRUE) {
       string <- paste(string, "\\normalsize\n", sep="")
     }
-    string <- paste(string, "\\end{center}\n", sep="")
-    string <- paste(string, "\\caption{", caption, "}\n", sep="")
+    if (caption.above == FALSE) {
+      string <- paste(string, "\\caption{", caption, "}\n", sep="")
+    }
     string <- paste(string, "\\label{", label, "}\n", sep="")
+    string <- paste(string, "\\end{center}\n", sep="")
     if (sideways == TRUE) {
       t <- "sideways"
     } else {
@@ -396,8 +420,10 @@ texreg <- function(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
 # htmlreg function
 htmlreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE, 
     strong.signif=FALSE, symbol="&middot;", caption="Statistical models", 
-    custom.names=NA, model.names=NA, digits=2, override.coef=0, override.se=0, 
-    override.pval=0, omit.coef=NA, file=NA, return.string=FALSE, ...) {
+    custom.names=NULL, custom.gof.names=NULL, model.names=NULL, digits=2, 
+    doctype=TRUE, star.symbol="*", align.center=FALSE, override.coef=0, 
+    override.se=0, override.pval=0, omit.coef=NA, reorder.coef=NULL, 
+    reorder.gof=NULL, file=NA, return.string=FALSE, ...) {
   
   models <- get.data(l, ...) #extract relevant coefficients, SEs, GOFs, etc.
   
@@ -406,10 +432,12 @@ htmlreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
   gof.names <- get.gof(models) #extract names of GOFs
   
   # arrange coefficients and GOFs nicely in a matrix
-  gofs <- aggregate.matrix(models, gof.names, digits, returnobject="gofs")
-  m <- aggregate.matrix(models, gof.names, digits, returnobject="m")
-  decimal.matrix <- aggregate.matrix(models, gof.names, digits, 
-      returnobject="decimal.matrix")
+  gofs <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
+      returnobject="gofs")
+  m <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
+      returnobject="m")
+  decimal.matrix <- aggregate.matrix(models, gof.names, custom.gof.names, 
+      digits, returnobject="decimal.matrix")
   
   m <- customnames(m, custom.names) #rename coefficients
   m <- rearrangeMatrix(m) #resort matrix and conflate duplicate entries
@@ -418,10 +446,16 @@ htmlreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
   
   modnames <- modelnames(models, model.names) #use (custom) model names
   
+  # reorder GOF and coef matrix
+  m <- reorder(m, reorder.coef)
+  gofs <- reorder(gofs, reorder.gof)
+  decimal.matrix <- reorder(decimal.matrix, reorder.gof)
+  
   # create output table with significance stars etc.
   output.matrix <- outputmatrix(m, single.row, neginfstring="-Inf", 
-      leading.zero, digits, se.prefix=" (", se.suffix=")", star.prefix="<sup>", 
-      star.suffix="</sup>", strong.signif, stars, dcolumn=TRUE, symbol)
+      leading.zero, digits, se.prefix=" (", se.suffix=")", 
+      star.char=star.symbol, star.prefix="<sup>", star.suffix="</sup>", 
+      strong.signif, stars, dcolumn=TRUE, symbol)
   
   # create GOF matrix (the lower part of the final output matrix)
   gof.matrix <- gofmatrix(gofs, decimal.matrix, leading.zero, 
@@ -431,26 +465,28 @@ htmlreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
   output.matrix <- rbind(output.matrix, gof.matrix)
   
   # write table header
-  if (single.row==TRUE) {
+  if (single.row == TRUE) {
     numcols <- 2 * length(models)
   } else {
     numcols <- length(models)
   }
   
-  if (strong.signif == TRUE && stars==TRUE) {
-    note <- paste("<sup>***</sup>p&lt;0.001, ", 
-        "<sup>**</sup>p&lt;0.01, <sup>*</sup>p&lt;0.05, <sup>", symbol, 
-        "</sup>p&lt;0.1", sep="")
-  } else if (stars==TRUE) {
-    note <- paste("<sup>***</sup>p&lt;0.01, ", 
-        "<sup>**</sup>p&lt;0.05, <sup>*</sup>p&lt;0.1", sep="")
+  if (doctype == TRUE) {
+    doct <- "<!DOCTYPE html>\n"
+  } else {
+    doct <- ""
+  }
+  
+  if (align.center == FALSE) {
+    tabdef <- "    <table cellspacing=\"0\">\n"
+  } else {
+    tabdef <- "    <table cellspacing=\"0\" align=\"center\">\n"
   }
   
   string <- paste(
       "\n", 
-      "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" ", 
-      "\"http://www.w3.org/TR/html4/loose.dtd\">\n\n", 
-      "<html>\n\n", 
+      doct, 
+      "<html>\n", 
       "  <head>\n", 
       "    <title>", caption, "</title>\n", 
       "    <style type=\"text/css\">\n", 
@@ -482,9 +518,7 @@ htmlreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
       "    </style>\n", 
       "  </head>\n\n", 
       "  <body>\n", 
-      "    <table cellspacing=\"0\">\n", 
-      "      <caption align=\"bottom\" style=\"font-size:0.8em\"><span>", note, 
-      "</span></caption>\n", 
+      tabdef, 
       "      <tr>\n", 
       "        <th class=\"modelnames\"></th>\n", 
       sep="")
@@ -524,6 +558,22 @@ htmlreg <- function(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE,
     }
     string <- paste(string, "      </tr>\n", sep="")
   }
+  
+  #significance legend
+  if (strong.signif == TRUE && stars==TRUE) {
+    note <- paste("<sup>", star.symbol, star.symbol, star.symbol, 
+        "</sup>p&lt;0.001, ", "<sup>", star.symbol, star.symbol, 
+        "</sup>p&lt;0.01, <sup>", star.symbol, "</sup>p&lt;0.05, <sup>", 
+        symbol, "</sup>p&lt;0.1", sep="")
+  } else if (stars==TRUE) {
+    note <- paste("<sup>", star.symbol, star.symbol, star.symbol, 
+        "</sup>p&lt;0.01, ", "<sup>", star.symbol, star.symbol, 
+        "</sup>p&lt;0.05, <sup>", star.symbol, "</sup>p&lt;0.1", sep="")
+  }
+  
+  string <- paste(string, "      <tr>\n", "        <td colspan=\"", 
+      (1 + length(models)), "\"><span style=\"font-size:0.8em\">", note, 
+      "</span></td>\n", "      </tr>\n", sep="")
   
   # write table footer
   string <- paste(string, "    </table>\n")

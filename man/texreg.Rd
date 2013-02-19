@@ -11,20 +11,24 @@ texreg(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE,
     strong.signif=FALSE, symbol="\\\\cdot", use.packages=TRUE, 
     caption="Statistical models", label="table:coefficients", 
     dcolumn=TRUE, booktabs=TRUE, scriptsize=FALSE, 
-    custom.names=NA, model.names=NA, digits=2, override.coef=0, 
-    override.se=0, override.pval=0, omit.coef=NA, file=NA, 
-    return.string=FALSE, ...)
+    custom.names=NULL, custom.gof.names=NULL, model.names=NULL, 
+    digits=2, override.coef=0, override.se=0, override.pval=0, 
+    omit.coef=NA, reorder.coef=NULL, reorder.gof=NULL, file=NA, 
+    return.string=FALSE, caption.above=FALSE, ...)
 htmlreg(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE, 
     strong.signif=FALSE, symbol="&middot;", 
-    caption="Statistical models", custom.names=NA, 
-    model.names=NA, digits=2, override.coef=0, override.se=0, 
-    override.pval=0, omit.coef=NA, file=NA, 
+    caption="Statistical models", custom.names=NULL, 
+    custom.gof.names=NULL, model.names=NULL, digits=2, 
+    doctype=TRUE, star.symbol="*", align.center=FALSE, 
+    override.coef=0, override.se=0, override.pval=0, 
+    omit.coef=NA, reorder.coef=NULL, reorder.gof=NULL, file=NA, 
     return.string=FALSE, ...)
 screenreg(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE, 
-    strong.signif=FALSE, custom.names=NA, model.names=NA, 
-    digits=2, outer.rule="=", inner.rule="-", column.spacing=2, 
-    override.coef=0, override.se=0, override.pval=0, 
-    omit.coef=NA, file=NA, return.string=FALSE, ...)
+    strong.signif=FALSE, custom.names=NULL, custom.gof.names=NULL, 
+    model.names=NULL, digits=2, outer.rule="=", inner.rule="-", 
+    column.spacing=2, override.coef=0, override.se=0, 
+    override.pval=0, omit.coef=NA, reorder.coef=NULL, 
+    reorder.gof=NULL, file=NA, return.string=FALSE, ...)
 }
 \details{
 texreg converts coefficients, standard errors, significance stars, 
@@ -51,20 +55,27 @@ easily implemented.
 \item{dcolumn}{ Use the \code{dcolumn} LaTeX package to get a nice alignment of the coefficients. }
 \item{booktabs}{ Use the \code{booktabs} LaTeX package to get thick horizontal rules in the output table. }
 \item{scriptsize}{ To save horizontal space on the page, the table can be set in script size instead of normal text size by setting \code{scriptsize=TRUE}. }
-\item{custom.names}{ By default, texreg uses the coefficient names which are stored in the models. The \code{custom.names} argument can be used to replace them by other character strings in the order of appearance. For example, if a table shows a total of three different independent variables (including the intercept), the argument \code{custom names=c("Intercept", "variable 1", "variable 2")} will replace their names in this order.
+\item{custom.names}{ By default, texreg uses the coefficient names which are stored in the models. The \code{custom.names} argument can be used to replace them by other character strings in the order of appearance. For example, if a table shows a total of three different coefficients (including the intercept), the argument \code{custom names=c("Intercept", "variable 1", "variable 2")} will replace their names in this order.
 
 Sometimes it happens that the same variable has a different name in different models. In this case, the user can use this function to assign identical names. If possible, the rows will then be merged into a single row unless both rows contain values in the same column. }
+\item{custom.gof.names}{ A character vector which is used to replace the names of the goodness-of-fit statistics at the bottom of the table. The vector must have the same length as the number of GOF statistics in the final table. The argument works like the \code{custom.names} argument, but for the GOF values. }
 \item{model.names}{ A string vector of labels for the models. By default, the models are named Model 1, Model 2, etc. Specifying \code{model.names=c("My name 1", "My name 2")} etc. overrides the default behavior. }
 \item{digits}{ Set the number of decimal places for coefficients, standard errors and goodness-of-fit statistics. Do not use negative values! }
 \item{override.coef}{ Set custom values for the coefficients. New coefficients are provided as a list of numeric vectors. The list contains vectors of coefficients for each model. There must be as many vectors of coefficients as there are models. For example, if there are two models with three model terms each, the argument could be specified as \code{override.coef=list(c(0.1, 0.2, 0.3), c(0.05, 0.06, 0.07))}. If there is only one model, custom values can be provided as a plain vector (not embedded in a list). For example: \code{override.coef=c(0.05, 0.06, 0.07)}. }
 \item{override.se}{ Set custom values for the standard errors. New standard errors are provided as a list of numeric vectors. The list contains vectors of standard errors for each model. There must be as many vectors of standard errors as there are models. For example, if there are two models with three coefficients each, the argument could be specified as \code{override.se=list(c(0.1, 0.2, 0.3), c(0.05, 0.06, 0.07))}. If there is only one model, custom values can be provided as a plain vector (not embedded in a list). For example: \code{override.se=c(0.05, 0.06, 0.07)}. }
 \item{override.pval}{ Set custom values for the p values. New p values are provided as a list of numeric vectors. The list contains vectors of p values for each model. There must be as many vectors of p values as there are models. For example, if there are two models with three coefficients each, the argument could be specified as \code{override.pval=list(c(0.1, 0.2, 0.3), c(0.05, 0.06, 0.07))}. If there is only one model, custom values can be provided as a plain vector (not embedded in a list). For example: \code{override.pval=c(0.05, 0.06, 0.07)}. }
 \item{omit.coef}{ A character string which is used as a regular expression to remove coefficient rows from the table. For example, \code{omit.coef="group"} deletes all coefficient rows from the table where the name of the coefficient contains the character sequence "group". }
+\item{reorder.coef}{ Reorder the rows of the coefficient block of the resulting table in a custom way. The argument takes a vector of the same length as the number of coefficients. For example, if there are three coefficients, \code{reorder.coef=c(3, 2, 1)} will put the third coefficient in the first row and the first coefficient in the third row. Reordering can be sensible because interaction effects are often added to the end of the model output although they were specified earlier in the model formula. Note: Reordering takes place after processing custom coefficient names and after omitting coefficients, so the \code{custom.names} and \code{omit.coef} arguments should follow the original order. }
+\item{reorder.gof}{ Reorder the rows of the goodness-of-fit block of the resulting table in a custom way. The argument takes a vector of the same length as the number of GOF statistics. For example, if there are three goodness-of-fit rows, \code{reorder.gof=c(3, 2, 1)} will exchange the first and the third row. Note: Reordering takes place after processing custom GOF names, so the \code{custom.gof.names} argument should follow the original order. }
 \item{file}{ Using this argument, the resulting table is written to a file rather than to the R prompt. The file name can be specified as a character string. Writing a table to a file can be useful for working with MS Office or LibreOffice. For example, an HTML table can be written to a file with the extension \code{.doc} and opened with MS Word. The table can then be simply copied into any Word document, retaining the formatting of the table. Note that LibreOffice can import only plain HTML; CSS decorations are not supported; the resulting tables do not retain the full formatting in LibreOffice. }
 \item{return.string}{ Should the table be returned as a character object, which can later be printed again using the \code{cat()} function? }
 \item{outer.rule}{ The character which is used to draw the outer horizontal line above and below a table (only for the \code{screenreg()} function). If an empty character object is provided (i.e., \code{outer.rule=""}), there will be no outer horizontal lines. Recommended values are \code{""}, \code{"="}, \code{"-"}, \code{"_"}, or \code{"#"}. }
 \item{inner.rule}{ The character which is used to draw the inner horizontal line above and below a table (only for the \code{screenreg()} function). If an empty character object is provided (i.e., \code{outer.rule=""}), there will be no inner horizontal lines. Recommended values are \code{""}, \code{"-"}, or \code{"_"}. }
+\item{doctype}{ For the \code{htmlreg()} function: should the first line of the HTML code contain the DOCTYPE definition? If \code{TRUE}, the HTML 5 version is used. If \code{FALSE}, no DOCTYPE will be included. Omitting the DOCTYPE can be helpful when the \pkg{knitr} package is used with Markdown scripts to generate HTML code. If \pkg{knitr} and Markdown are used and the DOCTYPE is included, the DOCTYPE line will be printed verbatim in the resulting HTML document. }
+\item{star.symbol}{ For the \code{htmlreg()} function: alternative characters for the significance stars can be specified. This is useful if \pkg{knitr} and Markdown are used for HTML report generation. In Markdown, asterisks or stars are interpreted as special characters, so they have to be escaped. To make \code{htmlreg()} compatible with Markdown, specify \code{star.symbol="\\*"}. }
+\item{align.center}{ For the \code{htmlreg()} function: should the resulting table be horizontally aligned at the center of the page? }
 \item{column.spacing}{ The amount of space between any two columns of a table (only for the \code{screenreg()} function). By default, two spaces are used. If the tables do not fit on a single page horizontally, the value can be set to \code{1} or \code{0}. }
+\item{caption.above}{ Should the caption of the table be placed above the table? By default, it is placed underneath the table. }
 \item{...}{ Custom options to be passed on to the extract function. }
 }
 \seealso{
