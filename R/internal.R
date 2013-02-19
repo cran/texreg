@@ -237,7 +237,8 @@ tex.replace <- function(models, type="html") {
 
 
 # put models and GOFs into a common matrix
-aggregate.matrix <- function(models, gof.names, digits, returnobject="m") {
+aggregate.matrix <- function(models, gof.names, custom.gof.names, digits, 
+    returnobject="m") {
 
   # aggregate GOF statistics in a matrix and create list of coef blocks
   gofs <- matrix(nrow=length(gof.names), ncol=length(models))
@@ -311,7 +312,24 @@ aggregate.matrix <- function(models, gof.names, digits, returnobject="m") {
   if (returnobject == "m") {
     return(m)
   } else if (returnobject == "gofs") {
+  
+    #replace GOF names by custom names
+    if (is.null(custom.gof.names)) {
+      #do nothing
+    } else if (class(custom.gof.names) != "character") {
+      stop("Custom GOF names must be provided as a vector of strings.")
+    } else if (length(custom.gof.names) != length(gof.names)) {
+      stop(paste("There are", length(gof.names), 
+          "GOF statistics, but you provided", length(custom.gof.names), 
+          "custom names for them."))
+    } else if (any(is.na(custom.gof.names))) {
+      stop("Custom GOF names are not allowed to contain NA values.")
+    } else {
+      rownames(gofs) <- custom.gof.names
+    }
+    
     return(gofs)
+    
   } else if (returnobject == "decimal.matrix") {
     return(decimal.matrix)
   }
@@ -320,8 +338,9 @@ aggregate.matrix <- function(models, gof.names, digits, returnobject="m") {
 
 # use custom coefficient names if provided
 customnames <- function(m, custom.names) {
-  
-  if (length(custom.names) > 1) {
+  if (is.null(custom.names)) {
+    return(m)
+  } else if (length(custom.names) > 1) {
     if (!class(custom.names) == "character") {
       stop("Custom coefficient names must be provided as a vector of strings!")
     } else if (length(custom.names) != length(rownames(m))) {
@@ -336,7 +355,6 @@ customnames <- function(m, custom.names) {
   } else if (length(custom.names) == 1 & class(custom.names) == "character") {
     rownames(m) <- custom.names
   }
-  
   return(m)
 }
 
@@ -348,7 +366,13 @@ omitcoef <- function(m, omit.coef) {
       stop("omit.coef must be a character string!")
     }
     remove.rows <- grep(omit.coef, rownames(m))
-    m <- m[-remove.rows,]
+    if (length(remove.rows) == 0) {
+      return(m)
+    } else if (length(remove.rows) == nrow(m)) {
+      stop("You were trying to remove all coefficients using omit.coef.")
+    } else {
+      m <- m[-remove.rows,]
+    }
   }
   return(m)
 }
@@ -356,7 +380,9 @@ omitcoef <- function(m, omit.coef) {
 
 # decide if default or custom model names should be used and return them
 modelnames <- function(models, model.names) {
-  if (length(model.names) > 1) {
+  if (is.null(model.names)) {
+    return(paste("Model", 1:length(models)))
+  } else if (length(model.names) > 1) {
     if (class(model.names) != "character") {
       stop("Model names must be specified as a vector of strings.")
     } else if (length(model.names) != length(models)) {
@@ -381,8 +407,8 @@ modelnames <- function(models, model.names) {
 
 # return the output matrix with coefficients, SEs and significance stars
 outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits, 
-    se.prefix, se.suffix, star.prefix, star.suffix, strong.signif, 
-    stars, dcolumn=TRUE, symbol) {
+    se.prefix, se.suffix, star.prefix, star.suffix, star.char="*", 
+    strong.signif, stars, dcolumn=TRUE, symbol) {
 
   # write coefficient rows
   if (single.row==TRUE) {
@@ -407,11 +433,12 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
               digits=digits), se.suffix, sep="")
           if (strong.signif == TRUE && stars==TRUE) {
             if (m[i,j+2] <= 0.001) {
-              p <- paste(star.prefix, "***", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.char, 
+                  star.suffix, sep="")
             } else if (m[i,j+2] <= 0.01) {
-              p <- paste(star.prefix, "**", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.suffix, sep="")
             } else if (m[i,j+2] <= 0.05) {
-              p <- paste(star.prefix, "*", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.suffix, sep="")
             } else if (m[i,j+2] <= 0.1) {
               p <- paste(star.prefix, symbol, star.suffix, sep="")
             } else {
@@ -419,11 +446,12 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
             }
           } else if (stars==TRUE) {
             if (m[i,j+2] <= 0.01) {
-              p <- paste(star.prefix, "***", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.char, 
+                  star.suffix, sep="")
             } else if (m[i,j+2] <= 0.05) {
-              p <- paste(star.prefix, "**", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.suffix, sep="")
             } else if (m[i,j+2] <= 0.1) {
-              p <- paste(star.prefix, "*", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.suffix, sep="")
             } else {
               p <- ""
             }
@@ -467,11 +495,12 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
         } else {
           if (strong.signif == TRUE && stars==TRUE) {
             if (m[i,j+2] <= 0.001) {
-              p <- paste(star.prefix, "***", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.char, 
+                  star.suffix, sep="")
             } else if (m[i,j+2] <= 0.01) {
-              p <- paste(star.prefix, "**", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.suffix, sep="")
             } else if (m[i,j+2] <= 0.05) {
-              p <- paste(star.prefix, "*", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.suffix, sep="")
             } else if (m[i,j+2] <= 0.1) {
               p <- paste(star.prefix, symbol, star.suffix, sep="")
             } else {
@@ -479,11 +508,12 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
             }
           } else if (stars==TRUE) {
             if (m[i,j+2] <= 0.01) {
-              p <- paste(star.prefix, "***", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.char, 
+                  star.suffix, sep="")
             } else if (m[i,j+2] <= 0.05) {
-              p <- paste(star.prefix, "**", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.char, star.suffix, sep="")
             } else if (m[i,j+2] <= 0.1) {
-              p <- paste(star.prefix, "*", star.suffix, sep="")
+              p <- paste(star.prefix, star.char, star.suffix, sep="")
             } else {
               p <- ""
             }
@@ -612,4 +642,32 @@ gofmatrix <- function(gofs, decimal.matrix, dcolumn=TRUE, leading.zero,
   return(gof.matrix)
 }
 
+# reorder a matrix according to a vector of new positions
+reorder <- function(mat, new.order) {
+  if (is.null(new.order)) {
+    return(mat)
+  } else if (nrow(mat) != length(new.order)) {
+    stop(paste("Error when reordering matrix: there are", nrow(mat), 
+        "rows, but you provided", length(new.order), "numbers."))
+  } else if (class(new.order) == "list") {
+    stop("Arguments reorder.coef and reorder.gof must be provided as a vector.")
+  } else if (any(is.na(new.order))) {
+    stop("reorder.coef and reorder.gof arguments must not contain NA values.")
+  } else if (length(new.order) != length(unique(new.order))) {
+    stop(paste("There are two identical values in the reorder.coef or", 
+        "reorder.gof argument. Ties are not allowed."))
+  } else if (max(new.order) != nrow(mat)) {
+    stop(paste("Table cannot be reordered because you provided a number that",
+        "exceeds the number of rows of the relevant part of the table."))
+  }
+  new.sorted <- sort(new.order)
+  for (i in 2:length(new.sorted)) {
+    if (new.sorted[i] - 1 != new.sorted[i-1]) {
+      stop(paste("Table cannot be reordered because there are non-adjacent", 
+          "values in the reorder.coef or reorder.gof vector you provided."))
+    }
+  }
+  new.mat <- mat[new.order,]
+  return(new.mat)
+}
 
