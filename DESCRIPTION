@@ -1,6 +1,6 @@
 Package: texreg
-Version: 1.21
-Date: 2013-02-19
+Version: 1.22
+Date: 2013-03-01
 Title: Conversion of R regression output to LaTeX or HTML tables.
 Author: Philip Leifeld
 Maintainer: Philip Leifeld <philip.leifeld@eawag.ch>
@@ -14,7 +14,10 @@ Description: texreg converts coefficients, standard errors,
 Suggests: nlme, survival, network, ergm, lme4
 Depends: R (>= 2.14.0), methods
 License: GPL-3
-Packaged: 2013-02-19 01:00:43 UTC; philip
-NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-02-19 21:34:28
+Repository/R-Forge/Project: texreg
+Repository/R-Forge/Revision: 80
+Repository/R-Forge/DateTimeStamp: 2013-03-01 20:53:53
+Date/Publication: 2013-03-02 10:30:19
+Packaged: 2013-03-01 23:17:56 UTC; rforge
+NeedsCompilation: no
