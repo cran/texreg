@@ -7,28 +7,31 @@
 \description{Conversion of R regression output to LaTeX or HTML tables.}
 \usage{
 texreg(l, single.row=FALSE, no.margin=TRUE, leading.zero=TRUE, 
-    table=TRUE, sideways=FALSE, float.pos="", stars=TRUE, 
-    strong.signif=FALSE, symbol="\\\\cdot", use.packages=TRUE, 
-    caption="Statistical models", label="table:coefficients", 
-    dcolumn=TRUE, booktabs=TRUE, scriptsize=FALSE, 
+    table=TRUE, sideways=FALSE, float.pos="", 
+    stars=c(0.001, 0.01, 0.05, 0.1), symbol="\\\\cdot", 
+    use.packages=TRUE, caption="Statistical models", 
+    label="table:coefficients", dcolumn=TRUE, booktabs=TRUE, 
+    scriptsize=FALSE, custom.names=NULL, custom.gof.names=NULL, 
+    model.names=NULL, digits=2, center=TRUE, override.coef=0, 
+    override.se=0, override.pval=0, omit.coef=NA, 
+    reorder.coef=NULL, reorder.gof=NULL, file=NA, 
+    return.string=FALSE, caption.above=FALSE, bold=0.00, 
+    custom.note=NULL, ...)
+htmlreg(l, single.row=FALSE, leading.zero=TRUE, 
+    stars=c(0.001, 0.01, 0.05, 0.1), symbol="&middot;", 
+    caption="", custom.names=NULL, custom.gof.names=NULL, 
+    model.names=NULL, digits=2, doctype=TRUE, star.symbol="*", 
+    center=FALSE, override.coef=0, override.se=0, override.pval=0, 
+    omit.coef=NA, reorder.coef=NULL, reorder.gof=NULL, file=NA, 
+    return.string=FALSE, caption.above=FALSE, bold=0.00, 
+    custom.note=NULL, ...)
+screenreg(l, single.row=FALSE, leading.zero=TRUE, 
+    stars=c(0.001, 0.01, 0.05, 0.1), symbol=".", 
     custom.names=NULL, custom.gof.names=NULL, model.names=NULL, 
-    digits=2, override.coef=0, override.se=0, override.pval=0, 
-    omit.coef=NA, reorder.coef=NULL, reorder.gof=NULL, file=NA, 
-    return.string=FALSE, caption.above=FALSE, ...)
-htmlreg(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE, 
-    strong.signif=FALSE, symbol="&middot;", 
-    caption="Statistical models", custom.names=NULL, 
-    custom.gof.names=NULL, model.names=NULL, digits=2, 
-    doctype=TRUE, star.symbol="*", align.center=FALSE, 
-    override.coef=0, override.se=0, override.pval=0, 
-    omit.coef=NA, reorder.coef=NULL, reorder.gof=NULL, file=NA, 
-    return.string=FALSE, ...)
-screenreg(l, single.row=FALSE, leading.zero=TRUE, stars=TRUE, 
-    strong.signif=FALSE, custom.names=NULL, custom.gof.names=NULL, 
-    model.names=NULL, digits=2, outer.rule="=", inner.rule="-", 
-    column.spacing=2, override.coef=0, override.se=0, 
-    override.pval=0, omit.coef=NA, reorder.coef=NULL, 
-    reorder.gof=NULL, file=NA, return.string=FALSE, ...)
+    digits=2, outer.rule="=", inner.rule="-", column.spacing=2, 
+    override.coef=0, override.se=0, override.pval=0, omit.coef=NA, 
+    reorder.coef=NULL, reorder.gof=NULL, file=NA, 
+    return.string=FALSE, custom.note=NULL, ...)
 }
 \details{
 texreg converts coefficients, standard errors, significance stars, 
@@ -46,8 +49,8 @@ easily implemented.
 \item{table}{ By default, texreg puts the actual \code{tabular} object in a \code{table} floating environment. To get only the \code{tabular} object without the whole table header, set \code{table=FALSE}. }
 \item{sideways}{ If \code{sideways=TRUE} is set, the \code{table} floating environment is replaced by a \code{sidewaystable} float, and the \code{rotating} package is loaded in the preamble. The argument only has an effect if \code{table=TRUE} is also set. }
 \item{float.pos}{ This argument specifies where the table should be located on the page or in the document. By default, no floating position is specified, and LaTeX takes care of the position automatically. Possible values include \code{h} (here), \code{p} (page), \code{t} (top), \code{b} (bottom), any combination thereof, e.g. \code{tb}, or any of these values followed by an exclamation mark, e.g. \code{t!}, in order to enforce this position. The square brackets do not have to be specified. }
-\item{stars}{ Should significance stars be printed after coefficients/standard errors, and should a note about significance levels be printed below the table? }
-\item{strong.signif}{ Conventional regression tables report 99 percent significance as three stars, 95 percent as two stars, and 90 percent as one star. For ERGMs, however, the de facto standard is to report 99.9 percent as three stars, 99 percent as two stars, 95 percent as one star, and 90 percent as a single dot. By default, texreg follows conventional significance levels. To use the stronger ERGM standard, set \code{strong.signif=TRUE}. }
+\item{stars}{ The significance levels to be used to draw stars. Between 0 and 4 threshold values can be provided as a numeric vector. For example, \code{stars=numeric(0)} will not print any stars and will not print any note about significance levels below the table. \code{stars=0.05} will attach one single star to all coefficients where the p value is below 0.05. \code{stars=c(0.001, 0.01, 0.05, 0.1)} will print one, two, or three stars, or a symbol as specified by the \code{symbol} argument depending on the p values. }
+\item{custom.note}{ With this argument, a replacement text for the significance note below the table can be provided. If an empty character object is provided (\code{custom.note=""}), the note will be omitted completely. }
 \item{symbol}{ By default, p values smaller than 0.1 and larger than 0.05 are reported as centered dots (\code{symbol="\\\\cdot"} for the LaTeX dot or \code{symbol="&middot;"} for the HTML dot) when \code{strong.signif=TRUE} is set. Any other mathematical LaTeX symbol or plain text symbol can be used, for example \code{symbol="\\\\circ"} for a small circle in LaTeX. }
 \item{use.packages}{ If this argument is set to \code{TRUE} (= the default behavior), the required LaTeX packages are loaded in the beginning. If set to \code{FALSE}, the use package statements are omitted from the output. }
 \item{caption}{ Set the caption of the table. }
@@ -73,9 +76,10 @@ Sometimes it happens that the same variable has a different name in different mo
 \item{inner.rule}{ The character which is used to draw the inner horizontal line above and below a table (only for the \code{screenreg()} function). If an empty character object is provided (i.e., \code{outer.rule=""}), there will be no inner horizontal lines. Recommended values are \code{""}, \code{"-"}, or \code{"_"}. }
 \item{doctype}{ For the \code{htmlreg()} function: should the first line of the HTML code contain the DOCTYPE definition? If \code{TRUE}, the HTML 5 version is used. If \code{FALSE}, no DOCTYPE will be included. Omitting the DOCTYPE can be helpful when the \pkg{knitr} package is used with Markdown scripts to generate HTML code. If \pkg{knitr} and Markdown are used and the DOCTYPE is included, the DOCTYPE line will be printed verbatim in the resulting HTML document. }
 \item{star.symbol}{ For the \code{htmlreg()} function: alternative characters for the significance stars can be specified. This is useful if \pkg{knitr} and Markdown are used for HTML report generation. In Markdown, asterisks or stars are interpreted as special characters, so they have to be escaped. To make \code{htmlreg()} compatible with Markdown, specify \code{star.symbol="\\*"}. }
-\item{align.center}{ For the \code{htmlreg()} function: should the resulting table be horizontally aligned at the center of the page? }
+\item{center}{ Should the table be horizontally aligned at the center of the page? }
 \item{column.spacing}{ The amount of space between any two columns of a table (only for the \code{screenreg()} function). By default, two spaces are used. If the tables do not fit on a single page horizontally, the value can be set to \code{1} or \code{0}. }
 \item{caption.above}{ Should the caption of the table be placed above the table? By default, it is placed underneath the table. }
+\item{bold}{ The p value threshold below which the coefficient shall be formatted in a bold font. For example, \code{bold=0.05} will cause all coefficients which are significant at the 95\% level to be formatted in bold. Note that this is not compatible with the dcolumn argument in the \code{texreg} function. If both are \code{TRUE}, dcolumn is switched off and a warning message appears. Note also that it is advisable to use \code{stars=FALSE} together with the \code{bold} argument. }
 \item{...}{ Custom options to be passed on to the extract function. }
 }
 \seealso{
@@ -105,5 +109,8 @@ cat(table.string)
 table.string <- htmlreg(list(model.1, model.2), file="texreg.doc")
 unlink("texreg.doc")
 }
-\keyword{Programming|programming|interface}
-\keyword{Programming|IO}
+\keyword{print}
+\keyword{misc}
+\keyword{utilities}
+\keyword{IO}
+\keyword{programming|interface}
