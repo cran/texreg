@@ -1,17 +1,22 @@
 \name{extract-methods}
 \docType{methods}
 \alias{extract-methods}
+\alias{extract,aftreg-method}
+\alias{extract,betareg-method}
 \alias{extract,clm-method}
 \alias{extract,clogit-method}
 \alias{extract,coxph-method}
 \alias{extract,coxph.penal-method}
 \alias{extract,dynlm-method}
 \alias{extract,ergm-method}
+\alias{extract,gam-method}
 \alias{extract,gee-method}
 \alias{extract,glm-method}
 \alias{extract,glmerMod-method}
 \alias{extract,gls-method}
 \alias{extract,gmm-method}
+\alias{extract,hurdle-method}
+\alias{extract,ivreg-method}
 \alias{extract,lm-method}
 \alias{extract,lme-method}
 \alias{extract,lmerMod-method}
@@ -19,8 +24,10 @@
 \alias{extract,lnam-method}
 \alias{extract,lrm-method}
 \alias{extract,mer-method}
+\alias{extract,multinom-method}
 \alias{extract,negbin-method}
 \alias{extract,nlmerMod-method}
+\alias{extract,phreg-method}
 \alias{extract,plm-method}
 \alias{extract,pmg-method}
 \alias{extract,polr-method}
@@ -31,15 +38,27 @@
 \alias{extract,sclm-method}
 \alias{extract,simex-method}
 \alias{extract,stergm-method}
+\alias{extract,survreg-method}
+\alias{extract,survreg.penal-method}
 \alias{extract,svyglm-method}
 \alias{extract,systemfit-method}
 \alias{extract,tobit-method}
+\alias{extract,weibreg-method}
+\alias{extract,zeroinfl-method}
 \title{Methods for Function \code{extract} in Package \pkg{texreg}}
 \description{
 Methods for function \code{extract} in package \pkg{texreg}.
 }
 \section{Methods}{
 \describe{
+
+\item{\code{extract.aftreg}}{
+An extract function for aftreg objects from the \pkg{eha} package.
+}
+
+\item{\code{extract.betareg}}{
+An extract function for betareg objects from the \pkg{betareg} package.
+}
 
 \item{\code{extract.clm}}{
 An extract function for clm objects from the \pkg{ordinal} package.
@@ -65,6 +84,10 @@ An extract function for dynlm objects from the \pkg{dynlm} package.
 An extract function for ergm objects from the \pkg{ergm} package.
 }
 
+\item{\code{extract.gam}}{
+An extract function for gam objects from the \pkg{mgcv} package.
+}
+
 \item{\code{extract.gee}}{
 An extract function for gee objects from the \pkg{gee} package.
 }
@@ -83,6 +106,14 @@ An extract function for gls objects from the \pkg{nlme} package.
 
 \item{\code{extract.gmm}}{
 An extract function for gmm objects from the \pkg{gmm} package.
+}
+
+\item{\code{extract.ivreg}}{
+An extract function for ivreg objects from the \pkg{AER} package.
+}
+
+\item{\code{extract.hurdle}}{
+An extract function for hurdle objects from the \pkg{pscl} package.
 }
 
 \item{\code{extract.lm}}{
@@ -113,12 +144,20 @@ An extract function for lrm objects from the \pkg{Design} or \pkg{rms} package.
 An extract function for mer objects from the (old) \pkg{lme4} package.
 }
 
+\item{\code{extract.multinom}}{
+An extract function for multinom objects from the \pkg{nnet} package.
+}
+
 \item{\code{extract.negbin}}{
 An extract function for negbin objects from the \pkg{MASS} package.
 }
 
 \item{\code{extract.nlmerMod}}{
 An extract function for nlmerMod objects from the (new) \pkg{lme4} package.
+}
+
+\item{\code{extract.phreg}}{
+An extract function for phreg objects from the \pkg{eha} package.
 }
 
 \item{\code{extract.plm}}{
@@ -161,6 +200,14 @@ An extract function for simex objects from the \pkg{simex} package.
 An extract function for stergm objects from the \pkg{tergm} package.
 }
 
+\item{\code{extract.survreg}}{
+An extract function for survreg objects from the \pkg{survival} package.
+}
+
+\item{\code{extract.survreg.penal}}{
+An extract function for survreg.penal objects from the \pkg{survival} package.
+}
+
 \item{\code{extract.svyglm}}{
 An extract function for svyglm objects from the \pkg{survey} package.
 }
@@ -171,6 +218,14 @@ An extract function for systemfit objects from the \pkg{systemfit} package.
 
 \item{\code{extract.tobit}}{
 An extract function for tobit objects from the \pkg{AER} package.
+}
+
+\item{\code{extract.weibreg}}{
+An extract function for weibreg objects from the \pkg{eha} package.
+}
+
+\item{\code{extract.zeroinfl}}{
+An extract function for zeroinfl objects from the \pkg{pscl} package.
 }
 }}
 \seealso{
