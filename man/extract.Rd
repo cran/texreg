@@ -2,6 +2,7 @@
 \alias{extract}
 \alias{extract.aftreg}
 \alias{extract.betareg}
+\alias{extract.brglm}
 \alias{extract.clm}
 \alias{extract.clogit}
 \alias{extract.coxph}
@@ -22,6 +23,7 @@
 \alias{extract.lmrob}
 \alias{extract.lnam}
 \alias{extract.lrm}
+\alias{extract.maBina}
 \alias{extract.mer}
 \alias{extract.multinom}
 \alias{extract.negbin}
@@ -30,7 +32,6 @@
 \alias{extract.plm}
 \alias{extract.pmg}
 \alias{extract.polr}
-\alias{extract.Relogit}
 \alias{extract.rem.dyad}
 \alias{extract.rlm}
 \alias{extract.rq}
@@ -41,8 +42,10 @@
 \alias{extract.survreg.penal}
 \alias{extract.svyglm}
 \alias{extract.systemfit}
+\alias{extract.texreg}
 \alias{extract.tobit}
 \alias{extract.weibreg}
+\alias{extract.zelig}
 \alias{extract.zeroinfl}
 \title{Extract coefficients and GOF measures from a statistical object}
 \description{Extract coefficients and GOF measures from a statistical object.}
@@ -55,6 +58,10 @@ extract.aftreg(model, include.loglik = TRUE, include.lr = TRUE,
 
 extract.betareg(model, include.precision = TRUE, 
     include.pseudors = TRUE, include.loglik = TRUE, 
+    include.nobs = TRUE, ...)
+
+extract.brglm(model, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
     include.nobs = TRUE, ...)
 
 extract.clm(model, include.thresholds = TRUE, include.aic = TRUE, 
@@ -135,6 +142,8 @@ extract.lnam(model, include.rsquared = TRUE, include.adjrs = TRUE,
 extract.lrm(model, include.pseudors = TRUE, include.lr = TRUE, 
     include.nobs = TRUE, ...)
 
+extract.maBina(model, ...)
+
 extract.mer(model, include.pvalues = FALSE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
     include.deviance = TRUE, include.nobs = TRUE, 
@@ -167,10 +176,6 @@ extract.pmg(model, include.nobs = TRUE, ...)
 extract.polr(model, include.thresholds = FALSE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
     include.deviance = TRUE, include.nobs = TRUE, ...)
-
-extract.Relogit(model, include.aic = TRUE, include.bic = TRUE, 
-    include.loglik = TRUE, include.deviance = TRUE, 
-    include.nobs = TRUE, ...)
 
 extract.rem.dyad(model, include.nvertices = TRUE, 
     include.events = TRUE, include.aic = TRUE, include.aicc = TRUE, 
@@ -207,6 +212,8 @@ extract.svyglm(model, include.aic = FALSE, include.bic = FALSE,
 extract.systemfit(model, include.rsquared = TRUE, 
     include.adjrs = TRUE, include.nobs = TRUE, ...)
 
+extract.texreg(model, ...)
+
 extract.tobit(model, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, include.deviance = TRUE, 
     include.nobs = FALSE, include.censnobs = TRUE, include.wald=TRUE, 
@@ -215,6 +222,10 @@ extract.tobit(model, include.aic = TRUE, include.bic = TRUE,
 extract.weibreg(model, include.loglik = TRUE, include.lr = TRUE, 
     include.nobs = TRUE, include.events = TRUE, include.trisk = TRUE, 
     ...)
+
+extract.zelig(model, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.nobs = TRUE, ...)
 
 extract.zeroinfl(model, beside = FALSE, include.count = TRUE, 
     include.zero = TRUE, include.aic = TRUE, include.loglik = TRUE, 
