@@ -2,7 +2,6 @@
 \alias{texreg}
 \alias{htmlreg}
 \alias{screenreg}
-\alias{write.texreg}
 \title{Convert regression output to LaTeX or HTML tables}
 \description{Conversion of R regression output to LaTeX or HTML tables.}
 \usage{
@@ -12,12 +11,14 @@ texreg(l, file = NA, single.row = FALSE, stars = c(0.001,
     custom.note = NULL, digits = 2, leading.zero = TRUE, 
     symbol = "\\\\cdot", override.coef = 0, override.se = 0, 
     override.pval = 0, omit.coef = NA, reorder.coef = NULL, 
-    reorder.gof = NULL, return.string = FALSE, bold = 0.00, 
-    center = TRUE, caption = "Statistical models", 
-    caption.above = FALSE, label = "table:coefficients", 
-    booktabs = FALSE, dcolumn = FALSE, sideways = FALSE, 
-    use.packages = TRUE, table = TRUE, no.margin = TRUE, 
-    scriptsize = FALSE, float.pos = "", ...)
+    reorder.gof = NULL, return.string = FALSE, 
+    ci.force = FALSE, ci.level = 0.95, ci.star = TRUE, 
+    bold = 0.00, center = TRUE, 
+    caption = "Statistical models", caption.above = FALSE, 
+    label = "table:coefficients", booktabs = FALSE, 
+    dcolumn = FALSE, sideways = FALSE, use.packages = TRUE, 
+    table = TRUE, no.margin = TRUE, scriptsize = FALSE, 
+    float.pos = "", ...)
 
 htmlreg(l, file = NA, single.row = FALSE, stars = c(0.001, 
     0.01, 0.05), custom.model.names = NULL, 
@@ -25,11 +26,13 @@ htmlreg(l, file = NA, single.row = FALSE, stars = c(0.001,
     custom.note = NULL, digits = 2, leading.zero = TRUE, 
     symbol = "&middot;", override.coef = 0, override.se = 0, 
     override.pval = 0, omit.coef = NA, reorder.coef = NULL, 
-    reorder.gof = NULL, return.string = FALSE, bold = 0.00, 
-    center = TRUE, caption = "Statistical models", 
-    caption.above = FALSE, star.symbol = "*", 
-    inline.css = TRUE, doctype = TRUE, html.tag = FALSE, 
-    head.tag = FALSE, body.tag = FALSE, ...)
+    reorder.gof = NULL, return.string = FALSE, 
+    ci.force = FALSE, ci.level = 0.95, ci.star = TRUE, 
+    bold = 0.00, center = TRUE, 
+    caption = "Statistical models", caption.above = FALSE, 
+    star.symbol = "*", inline.css = TRUE, doctype = TRUE, 
+    html.tag = FALSE, head.tag = FALSE, body.tag = FALSE, 
+    ...)
 
 screenreg(l, file = NA, single.row = FALSE, stars = c(0.001, 
     0.01, 0.05), custom.model.names = NULL, 
@@ -38,6 +41,7 @@ screenreg(l, file = NA, single.row = FALSE, stars = c(0.001,
     symbol = ".", override.coef = 0, override.se = 0, 
     override.pval = 0, omit.coef = NA, reorder.coef = NULL, 
     reorder.gof = NULL, return.string = FALSE, 
+    ci.force = FALSE, ci.level = 0.95, ci.star = TRUE, 
     column.spacing = 2, outer.rule = "=", inner.rule = "-", 
     ...)
 }
@@ -47,7 +51,8 @@ and goodness-of-fit statistics of statistical models into LaTeX
 tables or HTML tables or into nicely formatted screen output for 
 the R console. A list of several models can be combined in a 
 single table. The output is customizable. New model types can be 
-easily implemented.
+easily implemented. Confidence intervals can be used instead of 
+standard errors and p values.
 
 The \code{texreg()} function creates LaTeX code for inclusion 
 in a LaTeX document or for usage with \pkg{Sweave} or \pkg{knitr}.
@@ -76,7 +81,7 @@ identical.
 \item{single.row}{By default, a model parameter takes up two lines of the table: the standard error is listed in parentheses under the coefficient. This saves a lot of horizontal space on the page and is the default table format in most academic journals. If \code{single.row = TRUE} is activated, however, both coefficient and standard error are placed in a single table cell in the same line.}
 \item{stars}{The significance levels to be used to draw stars. Between 0 and 4 threshold values can be provided as a numeric vector. For example, \code{stars = numeric(0)} will not print any stars and will not print any note about significance levels below the table. \code{stars = 0.05} will attach one single star to all coefficients where the p value is below 0.05. \code{stars = c(0.001, 0.01, 0.05, 0.1)} will print one, two, or three stars, or a symbol as specified by the \code{symbol} argument depending on the p values.}
 \item{custom.model.names}{A character vector of labels for the models. By default, the models are named Model 1, Model 2, etc. Specifying \code{model.names = c("My name 1", "My name 2")} etc. overrides the default behavior.}
-\item{custom.coef.names}{By default, texreg uses the coefficient names which are stored in the models. The \code{custom.names} argument can be used to replace them by other character strings in the order of appearance. For example, if a table shows a total of three different coefficients (including the intercept), the argument \code{custom.coef.names = c("Intercept", "variable 1", "variable 2")} will replace their names in this order.
+\item{custom.coef.names}{By default, \pkg{texreg} uses the coefficient names which are stored in the models. The \code{custom.coef.names} argument can be used to replace them by other character strings in the order of appearance. For example, if a table shows a total of three different coefficients (including the intercept), the argument \code{custom.coef.names = c("Intercept", "variable 1", "variable 2")} will replace their names in this order.
 
 Sometimes it happens that the same variable has a different name in different models. In this case, the user can use this function to assign identical names. If possible, the rows will then be merged into a single row unless both rows contain values in the same column.
 
@@ -93,6 +98,9 @@ Where the argument contains an \code{NA} value, the original name of the coeffic
 \item{reorder.coef}{Reorder the rows of the coefficient block of the resulting table in a custom way. The argument takes a vector of the same length as the number of coefficients. For example, if there are three coefficients, \code{reorder.coef = c(3, 2, 1)} will put the third coefficient in the first row and the first coefficient in the third row. Reordering can be sensible because interaction effects are often added to the end of the model output although they were specified earlier in the model formula. Note: Reordering takes place after processing custom coefficient names and after omitting coefficients, so the \code{custom.coef.names} and \code{omit.coef} arguments should follow the original order.}
 \item{reorder.gof}{Reorder the rows of the goodness-of-fit block of the resulting table in a custom way. The argument takes a vector of the same length as the number of GOF statistics. For example, if there are three goodness-of-fit rows, \code{reorder.gof = c(3, 2, 1)} will exchange the first and the third row. Note: Reordering takes place after processing custom GOF names, so the \code{custom.gof.names} argument should follow the original order.}
 \item{return.string}{Should the table be returned as a character object, which can later be printed again using the \code{cat()} function?}
+\item{ci.force}{Should confidence intervals be used instead of the default standard errors and p values? Most models implemented in the \pkg{texreg} package report standard errors and p values by default while few models report confidence intervals. However, the functions in the \pkg{texreg} package can convert standard errors and into confidence intervals if desired. To enforce confidence intervals instead of standard errors, the \code{ci.force} argument accepts either a logical value indicating whether all models or none of the models should be forced to report confidence intervals (\code{ci.force = TRUE} for all and \code{ci.force = FALSE} for none) or a vector of logical values indicating for each model separately whether the model should be forced to report confidence intervals (e.g., \code{ci.force = c(FALSE, TRUE, FALSE)}).}
+\item{ci.level}{If the \code{ci.force} argument is used to convert standard errors to confidence intervals, what confidence level should be used? By default, \code{0.95} is used (i.e., an alpha value of 0.05).}
+\item{ci.star}{If confidence intervals are reported, should a star be printed to denote significance (i.e., cases where the confidence interval does not include \code{0})? This argument works both for models with native support for confidence intervals and in cases where the \code{ci.force} argument is used.}
 
 \item{bold}{[only in the \code{texreg} and \code{htmlreg} functions] The p value threshold below which the coefficient shall be formatted in a bold font. For example, \code{bold = 0.05} will cause all coefficients which are significant at the 95\% level to be formatted in bold. Note that this is not compatible with the dcolumn argument in the \code{texreg} function. If both are \code{TRUE}, dcolumn is switched off and a warning message appears. Note also that it is advisable to use \code{stars = FALSE} together with the \code{bold} argument because having both bolded coefficients and significance stars usually does not make any sense.}
 \item{center}{[only in the \code{texreg} and \code{htmlreg} functions] Should the table be horizontally aligned at the center of the page?}
@@ -123,7 +131,7 @@ Where the argument contains an \code{NA} value, the original name of the coeffic
 \item{...}{Custom options to be passed on to the extract function. For example, most extract methods provide custom options for the inclusion or exclusion of specific goodness-of-fit statistics, or for naive versus MCMC-based computation of p values. See the help entries of \link{extract} and \link{extract-methods} for more information.}
 }
 \seealso{
-\code{\link{texreg-package} \link{extract} \link{extract-methods}}
+\code{\link{texreg-package} \link{extract} \link{extract-methods} \link{plotreg}}
 }
 \author{
 Philip Leifeld (\url{http://www.philipleifeld.de})

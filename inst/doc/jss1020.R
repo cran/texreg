@@ -2,13 +2,13 @@
 ### Encoding: UTF-8
 
 ###################################################
-### code chunk number 1: jss1020.Rnw:442-443
+### code chunk number 1: jss1020.Rnw:452-453
 ###################################################
 options(prompt="R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 
 ###################################################
-### code chunk number 2: jss1020.Rnw:449-455
+### code chunk number 2: jss1020.Rnw:459-465
 ###################################################
 ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
 trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
@@ -19,27 +19,27 @@ m2 <- lm(weight ~ group - 1)
 
 
 ###################################################
-### code chunk number 3: jss1020.Rnw:458-459
+### code chunk number 3: jss1020.Rnw:468-469
 ###################################################
 summary(m2)
 
 
 ###################################################
-### code chunk number 4: jss1020.Rnw:464-466 (eval = FALSE)
+### code chunk number 4: jss1020.Rnw:474-476 (eval = FALSE)
 ###################################################
 ## library("texreg")
 ## screenreg(list(m1, m2))
 
 
 ###################################################
-### code chunk number 5: jss1020.Rnw:470-472
+### code chunk number 5: jss1020.Rnw:480-482
 ###################################################
 library("texreg")
 screenreg(list(m1, m2))
 
 
 ###################################################
-### code chunk number 6: jss1020.Rnw:485-494
+### code chunk number 6: jss1020.Rnw:495-504
 ###################################################
 texreg(
     list(m1, m2), 
@@ -53,7 +53,7 @@ texreg(
 
 
 ###################################################
-### code chunk number 7: jss1020.Rnw:496-505
+### code chunk number 7: jss1020.Rnw:506-515
 ###################################################
 texreg(
     list(m1, m2), 
@@ -67,7 +67,7 @@ texreg(
 
 
 ###################################################
-### code chunk number 8: jss1020.Rnw:523-536
+### code chunk number 8: jss1020.Rnw:533-546
 ###################################################
 mytable <- texreg(
     list(m1, m2), 
@@ -85,13 +85,13 @@ mytable <- texreg(
 
 
 ###################################################
-### code chunk number 9: jss1020.Rnw:539-540
+### code chunk number 9: jss1020.Rnw:549-550
 ###################################################
 cat(mytable)
 
 
 ###################################################
-### code chunk number 10: jss1020.Rnw:555-579
+### code chunk number 10: jss1020.Rnw:565-589
 ###################################################
 library("nlme")
 m3 <- gls(follicles ~ sin(2 * pi * Time) + cos(2 * pi * Time), Ovary,
@@ -120,7 +120,7 @@ table <- texreg(
 
 
 ###################################################
-### code chunk number 11: jss1020.Rnw:612-619 (eval = FALSE)
+### code chunk number 11: jss1020.Rnw:622-629 (eval = FALSE)
 ###################################################
 ## library("sandwich")
 ## library("lmtest")
@@ -132,20 +132,43 @@ table <- texreg(
 
 
 ###################################################
-### code chunk number 12: jss1020.Rnw:633-635
+### code chunk number 12: jss1020.Rnw:643-645
 ###################################################
 htmlreg(list(m1, m2, m3), file = "mytable.doc", inline.css = FALSE, 
     doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE)
 
 
 ###################################################
-### code chunk number 13: jss1020.Rnw:648-649
+### code chunk number 13: jss1020.Rnw:658-659
 ###################################################
 htmlreg(list(m1, m2, m3), star.symbol = "\\*", center = TRUE)
 
 
 ###################################################
-### code chunk number 14: jss1020.Rnw:692-716 (eval = FALSE)
+### code chunk number 14: jss1020.Rnw:673-685
+###################################################
+texreg(
+    list(m1, m1, m2), 
+    ci.force = c(FALSE, TRUE, TRUE), 
+    ci.star = TRUE, 
+    ci.level = 0.95, 
+    bold = 0.05,
+    float.pos = "h",
+    caption = "Enforcing confidence intervals.",
+    booktabs = TRUE,
+    use.packages = FALSE,
+    single.row = TRUE
+)
+
+
+###################################################
+### code chunk number 15: figure
+###################################################
+plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
+
+
+###################################################
+### code chunk number 16: jss1020.Rnw:747-771 (eval = FALSE)
 ###################################################
 ## extract.lm <- function(model) {
 ##   s <- summary(model)
@@ -174,21 +197,21 @@ htmlreg(list(m1, m2, m3), star.symbol = "\\*", center = TRUE)
 
 
 ###################################################
-### code chunk number 15: jss1020.Rnw:733-735 (eval = FALSE)
+### code chunk number 17: jss1020.Rnw:788-790 (eval = FALSE)
 ###################################################
 ## setMethod("extract", signature = className("lm", "stats"), 
 ##     definition = extract.lm)
 
 
 ###################################################
-### code chunk number 16: jss1020.Rnw:740-742 (eval = FALSE)
+### code chunk number 18: jss1020.Rnw:795-797 (eval = FALSE)
 ###################################################
 ## setMethod("extract", signature = className("clogit", "survival"), 
 ##     definition = extract.clogit)
 
 
 ###################################################
-### code chunk number 17: jss1020.Rnw:748-793 (eval = FALSE)
+### code chunk number 19: jss1020.Rnw:803-848 (eval = FALSE)
 ###################################################
 ## extract.lm <- function(model, include.rsquared = TRUE, 
 ##     include.adjrs = TRUE, include.nobs = TRUE, ...) {
@@ -238,37 +261,37 @@ htmlreg(list(m1, m2, m3), star.symbol = "\\*", center = TRUE)
 
 
 ###################################################
-### code chunk number 18: jss1020.Rnw:809-810 (eval = FALSE)
+### code chunk number 20: jss1020.Rnw:864-865 (eval = FALSE)
 ###################################################
 ## install.packages("texreg")
 
 
 ###################################################
-### code chunk number 19: jss1020.Rnw:813-814 (eval = FALSE)
+### code chunk number 21: jss1020.Rnw:868-869 (eval = FALSE)
 ###################################################
 ## install.packages("texreg", repos = "http://R-Forge.R-project.org")
 
 
 ###################################################
-### code chunk number 20: jss1020.Rnw:817-818 (eval = FALSE)
+### code chunk number 22: jss1020.Rnw:872-873 (eval = FALSE)
 ###################################################
 ## update.packages("texreg", repos = "http://R-Forge.R-project.org")
 
 
 ###################################################
-### code chunk number 21: jss1020.Rnw:828-829 (eval = FALSE)
+### code chunk number 23: jss1020.Rnw:883-884 (eval = FALSE)
 ###################################################
 ## help(package = "texreg")
 
 
 ###################################################
-### code chunk number 22: jss1020.Rnw:832-833 (eval = FALSE)
+### code chunk number 24: jss1020.Rnw:887-888 (eval = FALSE)
 ###################################################
 ## help("texreg")
 
 
 ###################################################
-### code chunk number 23: jss1020.Rnw:836-838 (eval = FALSE)
+### code chunk number 25: jss1020.Rnw:891-893 (eval = FALSE)
 ###################################################
 ## help("extract")
 ## help("extract-methods")
