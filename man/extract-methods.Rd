@@ -4,6 +4,7 @@
 \alias{extract,aftreg-method}
 \alias{extract,betareg-method}
 \alias{extract,brglm-method}
+\alias{extract,btergm-method}
 \alias{extract,clm-method}
 \alias{extract,clogit-method}
 \alias{extract,coxph-method}
@@ -28,6 +29,7 @@
 \alias{extract,mer-method}
 \alias{extract,multinom-method}
 \alias{extract,negbin-method}
+\alias{extract,nlme-method}
 \alias{extract,nlmerMod-method}
 \alias{extract,phreg-method}
 \alias{extract,plm-method}
@@ -67,6 +69,10 @@ An extract function for betareg objects from the \pkg{betareg} package.
 An extract function for brglm objects from the \pkg{brglm} package.
 }
 
+\item{\code{extract.btergm}}{
+An extract function for btergm objects from the \pkg{btergm} package.
+}
+
 \item{\code{extract.clm}}{
 An extract function for clm objects from the \pkg{ordinal} package.
 }
@@ -104,7 +110,7 @@ An extract function for glm objects from the \pkg{stats} package.
 }
 
 \item{\code{extract.glmerMod}}{
-An extract function for glmerMod objects from the (new) \pkg{lme4} package.
+An extract function for glmerMod objects from the \pkg{lme4} package.
 }
 
 \item{\code{extract.gls}}{
@@ -132,7 +138,7 @@ An extract function for lme objects from the \pkg{nlme} package.
 }
 
 \item{\code{extract.lmerMod}}{
-An extract function for lmerMod objects from the (new) \pkg{lme4} package.
+An extract function for lmerMod objects from the \pkg{lme4} package.
 }
 
 \item{\code{extract.lmrob}}{
@@ -163,8 +169,12 @@ An extract function for multinom objects from the \pkg{nnet} package.
 An extract function for negbin objects from the \pkg{MASS} package.
 }
 
+\item{\code{extract.nlme}}{
+An extract function for nlme objects from the \pkg{nlme} package.
+}
+
 \item{\code{extract.nlmerMod}}{
-An extract function for nlmerMod objects from the (new) \pkg{lme4} package.
+An extract function for nlmerMod objects from the \pkg{lme4} package.
 }
 
 \item{\code{extract.phreg}}{
