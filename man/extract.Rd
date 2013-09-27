@@ -20,6 +20,7 @@
 \alias{extract.ivreg}
 \alias{extract.lm}
 \alias{extract.lme}
+\alias{extract.lme4}
 \alias{extract.lmerMod}
 \alias{extract.lmrob}
 \alias{extract.lnam}
@@ -38,6 +39,7 @@
 \alias{extract.rlm}
 \alias{extract.rq}
 \alias{extract.sclm}
+\alias{extract.sienaFit}
 \alias{extract.simex}
 \alias{extract.stergm}
 \alias{extract.survreg}
@@ -108,11 +110,11 @@ extract.glm(model, include.aic = TRUE, include.bic = TRUE,
     include.loglik = TRUE, include.deviance = TRUE, 
     include.nobs = TRUE, ...)
 
-extract.glmerMod(model, include.pvalues = TRUE, include.aic = TRUE, 
-    include.bic = TRUE, include.loglik = TRUE, 
-    include.deviance = TRUE, include.nobs = TRUE, 
-    include.groups = TRUE, include.variance = TRUE, 
-    mcmc = FALSE, mcmc.size = 5000, conf.level = 0.95, ...)
+extract.glmerMod(model, naive = FALSE, nsim = 1000, 
+    conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.variance = TRUE, ...)
 
 extract.gls(model, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, include.nobs = TRUE, ...)
@@ -133,11 +135,17 @@ extract.lm(model, include.rsquared = TRUE, include.adjrs = TRUE,
 extract.lme(model, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, include.nobs = TRUE, ...)
 
-extract.lmerMod(model, include.pvalues = TRUE, include.aic = TRUE, 
-    include.bic = TRUE, include.loglik = TRUE, 
-    include.deviance = TRUE, include.nobs = TRUE, 
-    include.groups = TRUE, include.variance = TRUE, 
-    mcmc = FALSE, mcmc.size = 5000, conf.level = 0.95, ...)
+extract.lme4(model, naive = FALSE, nsim = 1000, 
+    conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.variance = TRUE, ...)
+
+extract.lmerMod(model, naive = FALSE, nsim = 1000, 
+    conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.variance = TRUE, ...)
 
 extract.lmrob(model, include.nobs = TRUE, ...)
 
@@ -150,11 +158,11 @@ extract.lrm(model, include.pseudors = TRUE, include.lr = TRUE,
 
 extract.maBina(model, ...)
 
-extract.mer(model, include.pvalues = TRUE, include.aic = TRUE, 
-    include.bic = TRUE, include.loglik = TRUE, 
-    include.deviance = TRUE, include.nobs = TRUE, 
-    include.groups = TRUE, include.variance = TRUE, 
-    mcmc = FALSE, mcmc.size = 5000, conf.level = 0.95, ...)
+extract.mer(model, naive = FALSE, nsim = 1000, 
+    conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.variance = TRUE, ...)
 
 extract.multinom(model, include.pvalues = TRUE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
@@ -167,11 +175,11 @@ extract.negbin(model, include.aic = TRUE, include.bic = TRUE,
 extract.nlme(model, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, include.nobs = TRUE, ...)
 
-extract.nlmerMod(model, include.pvalues = TRUE, include.aic = TRUE, 
-    include.bic = TRUE, include.loglik = TRUE, 
-    include.deviance = TRUE, include.nobs = TRUE, 
-    include.groups = TRUE, include.variance = TRUE, 
-    mcmc = FALSE, mcmc.size = 5000, conf.level = 0.95, ...)
+extract.nlmerMod(model, naive = FALSE, nsim = 1000, 
+    conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.variance = TRUE, ...)
 
 extract.phreg(model, include.loglik = TRUE, include.lr = TRUE, 
     include.nobs = TRUE, include.events = TRUE, include.trisk = TRUE, 
@@ -198,6 +206,8 @@ extract.rq(model, include.nobs = TRUE, include.percentile = TRUE,
 extract.sclm(model, include.thresholds = TRUE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, include.nobs = TRUE, 
     ...)
+
+extract.sienaFit(model, include.iterations = TRUE, ...)
 
 extract.simex(model, jackknife = TRUE, include.nobs = TRUE, ...)
 
@@ -268,6 +278,7 @@ to convert them into texreg objects.
 \item{include.formation}{ If available: should the coefficients for the formation phase in a STERGM be reported? }
 \item{include.gcv}{ If available: should the GCV score be reported (in GAMs)? }
 \item{include.groups}{ If available: should the number of groups be reported? }
+\item{include.iterations}{ If available: should the number of iterations be included? }
 \item{include.loglik}{ If available: should the log-likelihood be reported? }
 \item{include.lr}{ If available: should the likelihood ratio test be reported? }
 \item{include.maxrs}{If available: should the maximum possible R-squared be reported? }
@@ -290,8 +301,8 @@ to convert them into texreg objects.
 \item{include.zero}{ If available: should the zero-inflation model of a zero-inflated regression or the zero hurdle model of a hurdle regression be included in the coefficients block (after the count model)? }
 \item{include.zph}{ If available: should the Cox proportional hazards assumption be tested (resulting in a p value indicating whether the proportional hazards assumption of the model is violated)? }
 \item{jackknife}{ If available: use Jackknife variance instead of Asymptotic variance. }
-\item{mcmc}{ In linear mixed effects models: compute MCMC-based confidence intervals instead of naive p values. Note that MCMC is not available for all models in the \pkg{lme4} package. Warning: MCMC computations may take some time. }
-\item{mcmc.size}{ In linear mixed effects models: the MCMC sample size from which confidence intervals are derived. Note: high values may take considerable computing time. }
+\item{naive}{ If available: use naive p values and standard errors. }
+\item{nsim}{ In linear mixed effects models: the MCMC sample size from which confidence intervals are derived (for old versions of the \pkg{lme4} package), or the number of simulations on which bootstrapped confidence intervals should be based (for newer versions of the \pkg{lme4} package; only if the argument \code{method = "boot"} is provided, otherwise CIs are based on profile likelihood). Note: high values may take considerable computing time. }
 \item{robust}{ If available: report robust instead of native standard errors. }
 \item{...}{ Custom parameters. }
 }
