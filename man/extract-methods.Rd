@@ -21,6 +21,7 @@
 \alias{extract,ivreg-method}
 \alias{extract,lm-method}
 \alias{extract,lme-method}
+\alias{extract,lme4-method}
 \alias{extract,lmerMod-method}
 \alias{extract,lmrob-method}
 \alias{extract,lnam-method}
@@ -39,6 +40,7 @@
 \alias{extract,rlm-method}
 \alias{extract,rq-method}
 \alias{extract,sclm-method}
+\alias{extract,sienaFit-method}
 \alias{extract,simex-method}
 \alias{extract,stergm-method}
 \alias{extract,survreg-method}
@@ -110,7 +112,7 @@ An extract function for glm objects from the \pkg{stats} package.
 }
 
 \item{\code{extract.glmerMod}}{
-An extract function for glmerMod objects from the \pkg{lme4} package.
+An extract function for glmerMod objects from the (old) \pkg{lme4} package.
 }
 
 \item{\code{extract.gls}}{
@@ -137,8 +139,12 @@ An extract function for lm objects from the \pkg{stats} package.
 An extract function for lme objects from the \pkg{nlme} package.
 }
 
+\item{\code{extract.lme4}}{
+An extract function for lme4 objects from the \pkg{lme4} package.
+}
+
 \item{\code{extract.lmerMod}}{
-An extract function for lmerMod objects from the \pkg{lme4} package.
+An extract function for lmerMod objects from the (old) \pkg{lme4} package.
 }
 
 \item{\code{extract.lmrob}}{
@@ -174,7 +180,7 @@ An extract function for nlme objects from the \pkg{nlme} package.
 }
 
 \item{\code{extract.nlmerMod}}{
-An extract function for nlmerMod objects from the \pkg{lme4} package.
+An extract function for nlmerMod objects from the (old) \pkg{lme4} package.
 }
 
 \item{\code{extract.phreg}}{
@@ -207,6 +213,10 @@ An extract function for rq objects from the \pkg{quantreg} package.
 
 \item{\code{extract.sclm}}{
 An extract function for sclm objects from the \pkg{ordinal} package.
+}
+
+\item{\code{extract.sienaFit}}{
+An extract function for sienaFit objects from the \pkg{RSiena} package.
 }
 
 \item{\code{extract.simex}}{
