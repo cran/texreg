@@ -214,17 +214,68 @@ override <- function(models, override.coef, override.se, override.pval) {
 }
 
 
-# function which converts LaTeX code in GOF names to HTML oder text/screen code
+# function which converts GOF/coef LaTeX code to HTML oder text/screen code
 tex.replace <- function(models, type = "html", style = "") {
   for (i in 1:length(models)) {
+    # GOF replacement
     if (type == "html") {
       r <- paste0("<sup", style, ">2</sup>")
     } else if (type == "screen") {
       r <- "^2"
     }
-    models[[i]]@gof.names <- sub("\\$\\^2\\$", r, models[[i]]@gof.names)
-    models[[i]]@gof.names <- sub("\\\\ ", " ", models[[i]]@gof.names)
-    models[[i]]@gof.names <- sub("\\ ", " ", models[[i]]@gof.names)
+    models[[i]]@gof.names <- gsub("\\$\\^2\\$", r, models[[i]]@gof.names)
+    models[[i]]@gof.names <- gsub("\\\\ ", " ", models[[i]]@gof.names)
+    models[[i]]@gof.names <- gsub("\\ ", " ", models[[i]]@gof.names)
+    
+    # extract.gamlss coefficient name replacement
+    models[[i]]@coef.names <- gsub("\\$\\\\mu\\$", "mu", models[[i]]@coef.names)
+    models[[i]]@coef.names <- gsub("\\$\\\\nu\\$", "nu", models[[i]]@coef.names)
+    models[[i]]@coef.names <- gsub("\\$\\\\tau\\$", "tau", 
+        models[[i]]@coef.names)
+    models[[i]]@coef.names <- gsub("\\$\\\\sigma\\$", "sigma", 
+        models[[i]]@coef.names)
+  }
+  return(models)
+}
+
+
+# function which replaces special characters in row names by LaTeX equivalents
+replaceSymbols <- function(m) {
+  rn <- rownames(m)
+  for (i in 1:length(rn)) {
+    if (!grepl("\\$", rn[i])) {
+      rn[i] <- gsub("_", "\\\\_", rn[i])
+      rn[i] <- gsub("<", "\\$<\\$", rn[i])
+      rn[i] <- gsub(">", "\\$>\\$", rn[i])
+      rn[i] <- gsub("\\{", "\\\\{", rn[i])
+      rn[i] <- gsub("\\}", "\\\\}", rn[i])
+      rn[i] <- gsub("%", "\\\\%", rn[i])
+    }
+  }
+  rownames(m) <- rn
+  return(m)
+}
+
+
+# correct duplicate coefficient names (add " (1)", " (2)" etc.)
+correctDuplicateCoefNames <- function(models) {
+  for (i in 1:length(models)) {
+    for (j in 1:length(models[[i]]@coef.names)) {
+      if (models[[i]]@coef.names[j] %in% models[[i]]@coef.names[-j]) {
+        indices <- j
+        for (k in 1:length(models[[i]]@coef.names)) {
+          if (models[[i]]@coef.names[j] == models[[i]]@coef.names[k] && j != k) {
+            indices <- c(indices, k)
+          }
+        }
+        count <- 1
+        for (k in indices) {
+          models[[i]]@coef.names[k] <- paste0(models[[i]]@coef.names[k], " (", 
+              count, ")")
+          count <- count + 1
+        }
+      }
+    }
   }
   return(models)
 }
