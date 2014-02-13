@@ -20,6 +20,7 @@ screenreg <- function(l, file = NA, single.row = FALSE,
   models <- tex.replace(models, type = "screen")  #convert TeX code to text code
   models <- ciforce(models, ci.force = ci.force, ci.level = ci.force.level)
   gof.names <- get.gof(models)  #extract names of GOFs
+  models <- correctDuplicateCoefNames(models)
   
   # arrange coefficients and GOFs nicely in a matrix
   gofs <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
@@ -229,8 +230,8 @@ texreg <- function(l, file = NA, single.row = FALSE,
     dcolumn <- FALSE
     msg <- paste("The dcolumn package and the bold argument cannot be used at", 
         "the same time. Switching off dcolumn.")
-    if (stars == TRUE) {
-      warning(paste(msg, "You should also consider setting stars = FALSE."))
+    if (length(stars) > 1 || stars == TRUE) {
+      warning(paste(msg, "You should also consider setting stars = 0."))
     } else {
       warning(msg)
     }
@@ -240,6 +241,7 @@ texreg <- function(l, file = NA, single.row = FALSE,
   gof.names <- get.gof(models)  #extract names of GOFs
   models <- override(models, override.coef, override.se, override.pval)
   models <- ciforce(models, ci.force = ci.force, ci.level = ci.force.level)
+  models <- correctDuplicateCoefNames(models)
   
   # arrange coefficients and GOFs nicely in a matrix
   gofs <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
@@ -250,6 +252,7 @@ texreg <- function(l, file = NA, single.row = FALSE,
       digits, returnobject = "decimal.matrix")
   
   m <- customnames(m, custom.coef.names)  #rename coefficients
+  m <- replaceSymbols(m)
   m <- rearrangeMatrix(m)  #resort matrix and conflate duplicate entries
   m <- as.data.frame(m)
   m <- omitcoef(m, omit.coef)  #remove coefficient rows matching regex
@@ -283,7 +286,7 @@ texreg <- function(l, file = NA, single.row = FALSE,
       neginfstring = "\\multicolumn{1}{c}{$-$Inf}", leading.zero, digits, 
       se.prefix = " \\; (", se.suffix = ")", star.prefix = "^{", 
       star.suffix = "}", star.char = "*", stars, dcolumn = dcolumn, 
-      symbol, bold, bold.prefix = "\\textbf{", bold.suffix = "}", ci = ci, 
+      symbol, bold, bold.prefix = "\\mathbf{", bold.suffix = "}", ci = ci, 
       semicolon = ";\\ ", ci.test = ci.test)
   
   # create GOF matrix (the lower part of the final output matrix)
@@ -468,31 +471,29 @@ texreg <- function(l, file = NA, single.row = FALSE,
       stop("Duplicate elements are not allowed in the stars argument.")
     }
     if (length(st) == 4) {
-      snote <- paste0("\\textsuperscript{***}$p<", st[1], 
-        "$, \n  \\textsuperscript{**}$p<", st[2], 
-        "$, \n  \\textsuperscript{*}$p<", st[3], 
-        "$, \n  \\textsuperscript{$", symbol, "$}$p<", st[4], "$")
+      snote <- paste0("$^{***}p<", st[1], 
+        "$, $^{**}p<", st[2], 
+        "$, $^*p<", st[3], 
+        "$, $^{", symbol, "}p<", st[4], "$")
     } else if (length(st) == 3) {
-      snote <- paste0("\\textsuperscript{***}$p<", st[1], 
-        "$, \n  \\textsuperscript{**}$p<", st[2], 
-        "$, \n  \\textsuperscript{*}$p<", st[3], "$")
+      snote <- paste0("$^{***}p<", st[1], 
+        "$, $^{**}p<", st[2], 
+        "$, $^*p<", st[3], "$")
     } else if (length(st) == 2) {
-      snote <- paste0("\\textsuperscript{**}$p<", st[1], 
-        "$, \n  \\textsuperscript{*}$p<", st[2], "$")
+      snote <- paste0("$^{**}p<", st[1], 
+        "$, $^*p<", st[2], "$")
     } else if (length(st) == 1) {
-      snote <- paste0("\\textsuperscript{*}$p<", st[1], "$")
+      snote <- paste0("$^*p<", st[1], "$")
     } else {
       snote <- ""
     }
     if (is.numeric(ci.test) && !is.na(ci.test) && nchar(snote) > 0 && any(ci)) {
       snote <- paste(snote, "(or", ci.test, "outside the confidence interval).")
     } else if (is.numeric(ci.test) && !is.na(ci.test) && any(ci)) {
-#      snote <- paste("\\textsuperscript{*}", ci.test,
       snote <- paste("$^*$", ci.test,  
           "outside the confidence interval")
     }
   } else if (is.numeric(ci.test) && !is.na(ci.test)) {
-#    snote <- paste("\\textsuperscript{*}", ci.test,
     snote <- paste("$^*$", ci.test,  
         "outside the confidence interval")
   } else {
@@ -587,6 +588,7 @@ htmlreg <- function(l, file = NA, single.row = FALSE,
   models <- tex.replace(models, type = "html", style = css.sup)  # TeX --> HTML
   models <- ciforce(models, ci.force = ci.force, ci.level = ci.force.level)
   gof.names <- get.gof(models)  # extract names of GOFs
+  models <- correctDuplicateCoefNames(models)
   
   # arrange coefficients and GOFs nicely in a matrix
   gofs <- aggregate.matrix(models, gof.names, custom.gof.names, digits, 
