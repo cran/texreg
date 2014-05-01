@@ -1,13 +1,13 @@
 ### R code from vignette source 'v55i08.Rnw'
 
 ###################################################
-### code chunk number 1: v55i08.Rnw:747-748
+### code chunk number 1: v55i08.Rnw:748-749
 ###################################################
 options(prompt="R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 
 ###################################################
-### code chunk number 2: v55i08.Rnw:755-761
+### code chunk number 2: v55i08.Rnw:756-762
 ###################################################
 ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
 trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
@@ -18,27 +18,27 @@ m2 <- lm(weight ~ group - 1)
 
 
 ###################################################
-### code chunk number 3: v55i08.Rnw:765-766
+### code chunk number 3: v55i08.Rnw:766-767
 ###################################################
 summary(m2)
 
 
 ###################################################
-### code chunk number 4: v55i08.Rnw:771-773 (eval = FALSE)
+### code chunk number 4: v55i08.Rnw:772-774 (eval = FALSE)
 ###################################################
 ## library("texreg")
 ## screenreg(list(m1, m2))
 
 
 ###################################################
-### code chunk number 5: v55i08.Rnw:777-779
+### code chunk number 5: v55i08.Rnw:778-780
 ###################################################
 library("texreg")
 screenreg(list(m1, m2))
 
 
 ###################################################
-### code chunk number 6: v55i08.Rnw:796-799
+### code chunk number 6: v55i08.Rnw:797-800
 ###################################################
 texreg(list(m1, m2), dcolumn = TRUE, booktabs = TRUE,
     use.packages = FALSE, label = "tab:3", caption = "Two linear models.",
@@ -46,7 +46,7 @@ texreg(list(m1, m2), dcolumn = TRUE, booktabs = TRUE,
 
 
 ###################################################
-### code chunk number 7: v55i08.Rnw:801-804
+### code chunk number 7: v55i08.Rnw:802-805
 ###################################################
 texreg(list(m1, m2), dcolumn = TRUE, booktabs = TRUE,
     use.packages = FALSE, label = "tab:3", caption = "Two linear models.",
@@ -54,7 +54,7 @@ texreg(list(m1, m2), dcolumn = TRUE, booktabs = TRUE,
 
 
 ###################################################
-### code chunk number 8: v55i08.Rnw:836-841
+### code chunk number 8: v55i08.Rnw:837-842
 ###################################################
 mytable <- texreg(list(m1, m2), label = "tab:4", 
     caption = "Bolded coefficients, custom notes, three digits.", 
@@ -64,7 +64,7 @@ mytable <- texreg(list(m1, m2), label = "tab:4",
 
 
 ###################################################
-### code chunk number 9: v55i08.Rnw:876-900
+### code chunk number 9: v55i08.Rnw:877-901
 ###################################################
 library("nlme")
 m3 <- gls(follicles ~ sin(2 * pi * Time) + cos(2 * pi * Time), Ovary,
@@ -93,7 +93,7 @@ table <- texreg(
 
 
 ###################################################
-### code chunk number 10: v55i08.Rnw:953-960 (eval = FALSE)
+### code chunk number 10: v55i08.Rnw:954-961 (eval = FALSE)
 ###################################################
 ## library("sandwich")
 ## library("lmtest")
@@ -105,21 +105,21 @@ table <- texreg(
 
 
 ###################################################
-### code chunk number 11: v55i08.Rnw:981-983
+### code chunk number 11: v55i08.Rnw:982-984
 ###################################################
 htmlreg(list(m1, m2, m3), file = "mytable.doc", inline.css = FALSE, 
     doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE)
 
 
 ###################################################
-### code chunk number 12: v55i08.Rnw:1005-1007
+### code chunk number 12: v55i08.Rnw:1006-1008
 ###################################################
 htmlreg(list(m1, m2, m3), star.symbol = "\\*", center = TRUE, 
     doctype = FALSE)
 
 
 ###################################################
-### code chunk number 13: v55i08.Rnw:1033-1037
+### code chunk number 13: v55i08.Rnw:1034-1038
 ###################################################
 texreg(list(m1, m1, m2), ci.force = c(FALSE, TRUE, TRUE), ci.test = 0,
     ci.force.level = 0.95, bold = 0.05, float.pos = "tb",
@@ -134,7 +134,7 @@ plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
 
 
 ###################################################
-### code chunk number 15: v55i08.Rnw:1109-1133 (eval = FALSE)
+### code chunk number 15: v55i08.Rnw:1110-1134 (eval = FALSE)
 ###################################################
 ## extract.lm <- function(model) {
 ##   s <- summary(model)
@@ -163,21 +163,21 @@ plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
 
 
 ###################################################
-### code chunk number 16: v55i08.Rnw:1157-1159 (eval = FALSE)
+### code chunk number 16: v55i08.Rnw:1158-1160 (eval = FALSE)
 ###################################################
 ## setMethod("extract", signature = className("lm", "stats"), 
 ##     definition = extract.lm)
 
 
 ###################################################
-### code chunk number 17: v55i08.Rnw:1166-1168 (eval = FALSE)
+### code chunk number 17: v55i08.Rnw:1167-1169 (eval = FALSE)
 ###################################################
 ## setMethod("extract", signature = className("clogit", "survival"), 
 ##     definition = extract.clogit)
 
 
 ###################################################
-### code chunk number 18: v55i08.Rnw:1177-1222 (eval = FALSE)
+### code chunk number 18: v55i08.Rnw:1178-1223 (eval = FALSE)
 ###################################################
 ## extract.lm <- function(model, include.rsquared = TRUE, 
 ##     include.adjrs = TRUE, include.nobs = TRUE, ...) {
@@ -227,37 +227,37 @@ plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
 
 
 ###################################################
-### code chunk number 19: v55i08.Rnw:1246-1247 (eval = FALSE)
+### code chunk number 19: v55i08.Rnw:1247-1248 (eval = FALSE)
 ###################################################
 ## install.packages("texreg")
 
 
 ###################################################
-### code chunk number 20: v55i08.Rnw:1250-1251 (eval = FALSE)
+### code chunk number 20: v55i08.Rnw:1251-1252 (eval = FALSE)
 ###################################################
 ## install.packages("texreg", repos = "http://R-Forge.R-project.org")
 
 
 ###################################################
-### code chunk number 21: v55i08.Rnw:1254-1255 (eval = FALSE)
+### code chunk number 21: v55i08.Rnw:1255-1256 (eval = FALSE)
 ###################################################
 ## update.packages("texreg", repos = "http://R-Forge.R-project.org")
 
 
 ###################################################
-### code chunk number 22: v55i08.Rnw:1265-1266 (eval = FALSE)
+### code chunk number 22: v55i08.Rnw:1266-1267 (eval = FALSE)
 ###################################################
 ## help(package = "texreg")
 
 
 ###################################################
-### code chunk number 23: v55i08.Rnw:1269-1270 (eval = FALSE)
+### code chunk number 23: v55i08.Rnw:1270-1271 (eval = FALSE)
 ###################################################
 ## help("texreg")
 
 
 ###################################################
-### code chunk number 24: v55i08.Rnw:1273-1275 (eval = FALSE)
+### code chunk number 24: v55i08.Rnw:1274-1276 (eval = FALSE)
 ###################################################
 ## help("extract")
 ## help("extract-methods")
