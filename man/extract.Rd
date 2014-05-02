@@ -30,10 +30,12 @@
 \alias{extract.lrm}
 \alias{extract.maBina}
 \alias{extract.mer}
+\alias{extract.mnlogit}
 \alias{extract.multinom}
 \alias{extract.negbin}
 \alias{extract.nlme}
 \alias{extract.nlmerMod}
+\alias{extract.pgmm}
 \alias{extract.phreg}
 \alias{extract.plm}
 \alias{extract.pmg}
@@ -41,6 +43,7 @@
 \alias{extract.rem.dyad}
 \alias{extract.rlm}
 \alias{extract.rq}
+\alias{extract.sarlm}
 \alias{extract.sclm}
 \alias{extract.sienaFit}
 \alias{extract.simex}
@@ -142,7 +145,8 @@ extract.lm(model, include.rsquared = TRUE, include.adjrs = TRUE,
     include.nobs = TRUE, include.fstatistic = FALSE, ...)
 
 extract.lme(model, include.aic = TRUE, include.bic = TRUE, 
-    include.loglik = TRUE, include.nobs = TRUE, ...)
+    include.loglik = TRUE, include.nobs = TRUE, 
+    include.groups = TRUE, include.variance = FALSE, ...)
 
 extract.lme4(model, naive = FALSE, nsim = 1000, 
     conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
@@ -173,6 +177,10 @@ extract.mer(model, naive = FALSE, nsim = 1000,
     include.nobs = TRUE, include.groups = TRUE, 
     include.variance = TRUE, ...)
 
+extract.mnlogit(model, include.aic = TRUE, include.loglik = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.intercept = TRUE, include.iterations = FALSE, ...)
+
 extract.multinom(model, include.pvalues = TRUE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
     include.deviance = TRUE, include.nobs = TRUE, ...)
@@ -182,13 +190,17 @@ extract.negbin(model, include.aic = TRUE, include.bic = TRUE,
     include.nobs = TRUE, ...)
 
 extract.nlme(model, include.aic = TRUE, include.bic = TRUE, 
-    include.loglik = TRUE, include.nobs = TRUE, ...)
+    include.loglik = TRUE, include.nobs = TRUE, 
+    include.groups = TRUE, include.variance = FALSE, ...)
 
 extract.nlmerMod(model, naive = FALSE, nsim = 1000, 
     conf.level = 0.95, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, include.deviance = TRUE, 
     include.nobs = TRUE, include.groups = TRUE, 
     include.variance = TRUE, ...)
+
+extract.pgmm(model, include.nobs = TRUE, include.sargan = TRUE, 
+    include.wald = TRUE, ...)
 
 extract.phreg(model, include.loglik = TRUE, include.lr = TRUE, 
     include.nobs = TRUE, include.events = TRUE, include.trisk = TRUE, 
@@ -211,6 +223,9 @@ extract.rlm(model, include.nobs = TRUE, ...)
 
 extract.rq(model, include.nobs = TRUE, include.percentile = TRUE, 
     ...)
+
+extract.sarlm(model, include.nobs = TRUE, include.aic = TRUE, 
+    include.loglik = TRUE, include.wald = TRUE, ...)
 
 extract.sclm(model, include.thresholds = TRUE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, include.nobs = TRUE, 
@@ -289,7 +304,8 @@ to convert them into texreg objects.
 \item{include.fstatistic}{ If available: should the F statistic be reported? }
 \item{include.gaic}{ If available: should the Generalized Akaike's information criterion (GAIC) be reported? }
 \item{include.gcv}{ If available: should the GCV score be reported (in GAMs)? }
-\item{include.groups}{ If available: should the number of groups be reported? }
+\item{include.groups}{ If available: should the number of groups in a mixed-effects model (or \code{k} alternatives in a multinomial choice model) be reported? }
+\item{include.intercept}{ If available: should the intercept be included in the GOF block? }
 \item{include.iterations}{ If available: should the number of iterations be included? }
 \item{include.loglik}{ If available: should the log-likelihood be reported? }
 \item{include.lr}{ If available: should the likelihood ratio test be reported? }
@@ -306,6 +322,7 @@ to convert them into texreg objects.
 \item{include.pseudors}{ If available: should the pseudo R-squared be reported? }
 \item{include.pvalues}{ If available: should the p values be reported (naive p values are not recommended for lme4 models, but see also the \code{mcmc.pvalues} argument)? }
 \item{include.rsquared}{ If available: should R-squared be reported? }
+\item{include.sargan}{ If available: should the Sargan test be reported? }
 \item{include.smooth}{ If available: should the smooth terms of a GAM be reported? If they are reported, the EDF value is reported as the coefficient, and DF is included in parentheses (not standard errors because a chi-square test is used for the smooth terms). }
 \item{include.thresholds}{ If available: should the threshold parameters (that is, the intercepts for the class boundaries) be reported in ordinal models? }
 \item{include.trisk}{ If available: should the total time at risk be reported (in event-history models)? }

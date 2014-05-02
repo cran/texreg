@@ -961,7 +961,9 @@ setMethod("extract", signature = className("ivreg", "AER"),
 
 # extension for lme objects
 extract.lme <- function(model, include.aic = TRUE, include.bic = TRUE, 
-    include.loglik = TRUE, include.nobs = TRUE, ...) {
+    include.loglik = TRUE, include.nobs = TRUE, include.groups = TRUE, 
+    include.variance = FALSE, ...) {
+  
   s <- summary(model, ...)
 
   coefficient.names <- rownames(s$tTable)
@@ -969,33 +971,64 @@ extract.lme <- function(model, include.aic = TRUE, include.bic = TRUE,
   standard.errors <- s$tTable[, 2]
   significance <- s$tTable[, 5]
   
-  lik <- s$logLik
-  aic <- s$AIC
-  bic <- s$BIC
-  n <- nobs(model)
-  
   gof <- numeric()
   gof.names <- character()
   gof.decimal <- logical()
   if (include.aic == TRUE) {
+    aic <- s$AIC
     gof <- c(gof, aic)
     gof.names <- c(gof.names, "AIC")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.bic == TRUE) {
+    bic <- s$BIC
     gof <- c(gof, bic)
     gof.names <- c(gof.names, "BIC")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.loglik == TRUE) {
+    lik <- s$logLik
     gof <- c(gof, lik)
     gof.names <- c(gof.names, "Log Likelihood")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.nobs == TRUE) {
+    n <- nobs(model)
     gof <- c(gof, n)
     gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.groups == TRUE) {
+    grp <- model$dims$ngrps[1:model$dims$Q]
+    gof <- c(gof, grp)
+    gof.names <- c(gof.names, "Num.\ groups")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.variance == TRUE ) {
+    sig.all <- s$sigma
+    if (!is.null(sig.all) && !is.na(sig.all)) {
+      gof <- c(gof, sig.all)
+      gof.names <- c(gof.names, "sigma")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    
+    vc <- VarCorr(model)
+    if ("(Intercept)" %in% rownames(vc) && "StdDev" %in% colnames(vc)) {
+      sig.RE <- as.numeric(vc["(Intercept)", "StdDev"])
+      if (!is.null(sig.RE) && !is.na(sig.RE)) {
+        gof <- c(gof, sig.RE)
+        gof.names <- c(gof.names, "sigma.\ RE")
+        gof.decimal <- c(gof.decimal, TRUE)
+      }
+    }
+    
+    cf <- coef(model$modelStruct, unconstrained = FALSE)["corStruct.Phi1"]
+    rho <- unname(cf)
+    if (!is.null(rho) && !is.na(rho)) {
+      gof <- c(gof, rho)
+      gof.names <- c(gof.names, "rho")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
   }
   
   tr <- createTexreg(
@@ -1351,6 +1384,78 @@ setMethod("extract", signature = className("maBina", "erer"),
     definition = extract.maBina)
 
 
+# extension for mnlogit objects (mnlogit package)
+extract.mnlogit <- function(model, include.aic = TRUE, include.loglik = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, include.intercept = TRUE, 
+    include.iterations = FALSE, ...) {
+  
+  s <- summary(model, ...)
+  
+  names <- names(s$coef)
+  coT <- s$CoefTable
+  co <- coT[, 1]
+  se <- coT[, 2]
+  pval <- coT[, 4]
+  
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (include.aic == TRUE) {
+    aic <- s$AIC
+    gof <- c(gof, aic)
+    gof.names <- c(gof.names, "AIC")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.loglik == TRUE) {
+    lik <- s$logLik
+    gof <- c(gof, lik)
+    gof.names <- c(gof.names, "Log\ Likelihood")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.nobs == TRUE) {
+    N <- s$model.size$N
+    gof <- c(gof, N)
+    gof.names <- c(gof.names, "Num.\ obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.groups == TRUE) {
+    K <- s$model.size$K
+    gof <- c(gof, K)
+    gof.names <- c(gof.names, "K")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.intercept == TRUE) {
+    b0 <- s$model.size$intercept
+    gof <- c(gof, b0)
+    gof.names <- c(gof.names, "Intercept")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.iterations == TRUE) {
+    iter <- s$est.stats$niters
+    gradNorm <- s$est.stats$gradNorm
+    diffLike <- s$est.stats$funcDiff
+    gof <- c(gof, iter, gradNorm, diffLike)
+    gof.names <- c(gof.names, "Iterations", "Gradient 2-norm", 
+        "Diff.\ Likelihood")
+    gof.decimal <- c(gof.decimal, c(FALSE, TRUE, TRUE))
+  }
+  
+  tr <- createTexreg(
+      coef.names = names, 
+      coef = co, 
+      se = se, 
+      pvalues = pval, 
+      gof.names = gof.names, 
+      gof = gof, 
+      gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature = className("mnlogit", "mnlogit"), 
+    definition = extract.mnlogit)
+
+
 # extension for multinom objects (nnet package)
 extract.multinom <- function(model, include.pvalues = TRUE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, include.deviance = TRUE, 
@@ -1416,6 +1521,74 @@ extract.multinom <- function(model, include.pvalues = TRUE, include.aic = TRUE,
 
 setMethod("extract", signature = className("multinom", "nnet"), 
     definition = extract.multinom)
+
+
+# extension for pgmm objects (from the plm package)
+extract.pgmm <- function(model, include.nobs = TRUE, include.sargan = TRUE, 
+    include.wald = TRUE, ...) {
+  
+  s <- summary(model, ...)
+  
+  coefficient.names <- rownames(s$coefficients)
+  coefficients <- s$coefficients[, 1]
+  standard.errors <- s$coefficients[, 2]
+  significance <- s$coefficients[, 4]
+  
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (include.nobs == TRUE) {
+    n <- attr(s, "pdim")$nT$n
+    T <- attr(s, "pdim")$nT$T
+    N <- attr(s, "pdim")$nT$N
+    ntot <- sum(unlist(s$residuals) != 0)
+    gof <- c(gof, n, T, N, ntot)
+    gof.names <- c(gof.names, "n", "T", "Num.\ obs.", "Num.\ obs.\ used")
+    gof.decimal <- c(gof.decimal, FALSE, FALSE, FALSE, FALSE)
+  }
+  if (include.sargan == TRUE) {
+    sarg.stat <- s$sargan$statistic
+    sarg.par <- s$sargan$parameter
+    sarg.pval <- s$sargan$p.value
+    gof <- c(gof, sarg.stat, sarg.par, sarg.pval)
+    gof.names <- c(gof.names, "Sargan Test: chisq", "Sargan Test: df", 
+        "Sargan Test: p-value")
+    gof.decimal <- c(gof.decimal, TRUE, TRUE, TRUE)
+  }
+  if (include.wald == TRUE) {
+    wald.coef <- s$wald.coef$statistic[1]
+    wald.pval <- s$wald.coef$p.value[1]
+    wald.par <- s$wald.coef$parameter
+    td.coef <- s$wald.td$statistic[1]
+    td.pval <- s$wald.td$p.value[1]
+    td.par <- s$wald.td$parameter
+    gof <- c(gof, wald.coef, wald.par, wald.pval, td.coef, td.par, td.pval)
+    gof.names <- c(
+        gof.names, 
+        "Wald Test Coefficients: chisq", 
+        "Wald Test Coefficients: df", 
+        "Wald Test Coefficients: p-value", 
+        "Wald Test Time Dummies: chisq", 
+        "Wald Test Time Dummies: df", 
+        "Wald Test Time Dummies: p-value"
+    )
+    gof.decimal <- c(gof.decimal, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE)
+  }
+  
+  tr <- createTexreg(
+      coef.names = coefficient.names, 
+      coef = coefficients, 
+      se = standard.errors, 
+      pvalues = significance, 
+      gof.names = gof.names, 
+      gof = gof, 
+      gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature = className("pgmm", "plm"), 
+    definition = extract.pgmm)
 
 
 # extension for plm objects (from the plm package)
@@ -1735,6 +1908,63 @@ extract.rq <- function(model, include.nobs = TRUE, include.percentile = TRUE,
 
 setMethod("extract", signature = className("rq", "quantreg"), 
     definition = extract.rq)
+
+
+# extension for sarlm objects (spdep package)
+extract.sarlm <- function(model, include.nobs = TRUE, include.aic = TRUE, 
+    include.loglik = TRUE, include.wald = TRUE, ...) {
+  s <- summary(model, ...)
+  
+  names <- rownames(s$Coef)
+  cf <- s$Coef[, 1]
+  se <- s$Coef[, 2]
+  p <- s$Coef[, 3]
+  
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  
+  if (include.nobs == TRUE) {
+    n <- length(s$fitted.values)
+    param <- s$parameters
+    gof <- c(gof, n, param)
+    gof.names <- c(gof.names, "Num.\ obs.", "Parameters")
+    gof.decimal <- c(gof.decimal, FALSE, FALSE)
+  }
+  if (include.aic == TRUE) {
+    aiclm <- s$AIC_lm.model
+    gof <- c(gof, aiclm)
+    gof.names <- c(gof.names, "AIC (Linear model)")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.loglik == TRUE) {
+    ll <- s$LL
+    gof <- c(gof, ll)
+    gof.names <- c(gof.names, "Log Likelihood")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.wald == TRUE) {
+    waldstat <- s$Wald1$statistic
+    waldp <- s$Wald1$p.value
+    gof <- c(gof, waldstat, waldp)
+    gof.names <- c(gof.names, "Wald test: statistic", "Wald test: p-value")
+    gof.decimal <- c(gof.decimal, TRUE, TRUE)
+  }
+  
+  tr <- createTexreg(
+      coef.names = names, 
+      coef = cf, 
+      se = se, 
+      pvalues = p, 
+      gof.names = gof.names, 
+      gof = gof, 
+      gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature = className("sarlm", "spdep"), 
+    definition = extract.sarlm)
 
 
 # extension for sienaFit objects (RSiena package)
@@ -2219,48 +2449,52 @@ extract.tobit <- function(model, include.aic = TRUE, include.bic = TRUE,
   co <- s$coefficients[, 1]
   se <- s$coefficients[, 2]
   pval <- s$coefficients[, 4]
-
-  n <- nobs(model)
-  censnobs <- s$n
-  censnobs.names <- names(censnobs)
-  aic <- AIC(model)
-  bic <- BIC(model)
-  lik <- logLik(model)[1]
-  dev <- deviance(model)
-  wald <- s$wald
   
   gof <- numeric()
   gof.names <- character()
   gof.decimal <- logical()
   if (include.aic == TRUE) {
+    aic <- AIC(model)
     gof <- c(gof, aic)
     gof.names <- c(gof.names, "AIC")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.bic == TRUE) {
+    bic <- BIC(model)
     gof <- c(gof, bic)
     gof.names <- c(gof.names, "BIC")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.loglik == TRUE) {
+    lik <- logLik(model)[1]
     gof <- c(gof, lik)
     gof.names <- c(gof.names, "Log Likelihood")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.deviance == TRUE) {
+    dev <- deviance(model)
     gof <- c(gof, dev)
     gof.names <- c(gof.names, "Deviance")
     gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.nobs == TRUE) {
+    n <- nobs(model)
     gof <- c(gof, n)
     gof.names <- c(gof.names, "Num.\ obs.")
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.censnobs == TRUE) {
+    censnobs <- s$n
+    censnobs.names <- names(censnobs)
     gof <- c(gof, censnobs)
     gof.names <- c(gof.names, censnobs.names)
     gof.decimal <- c(gof.decimal, rep(FALSE, length(censnobs)))
+  }
+  if (include.wald == TRUE) {
+    wald <- s$wald
+    gof <- c(gof, wald)
+    gof.names <- c(gof.names, "Wald Test")
+    gof.decimal <- c(gof.decimal, TRUE)
   }
   
   tr <- createTexreg(

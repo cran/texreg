@@ -31,10 +31,12 @@
 \alias{extract,lrm-method}
 \alias{extract,maBina-method}
 \alias{extract,mer-method}
+\alias{extract,mnlogit-method}
 \alias{extract,multinom-method}
 \alias{extract,negbin-method}
 \alias{extract,nlme-method}
 \alias{extract,nlmerMod-method}
+\alias{extract,pgmm-method}
 \alias{extract,phreg-method}
 \alias{extract,plm-method}
 \alias{extract,pmg-method}
@@ -42,6 +44,7 @@
 \alias{extract,rem.dyad-method}
 \alias{extract,rlm-method}
 \alias{extract,rq-method}
+\alias{extract,sarlm-method}
 \alias{extract,sclm-method}
 \alias{extract,sienaFit-method}
 \alias{extract,simex-method}
@@ -182,6 +185,10 @@ An extract function for maBina objects from the \pkg{erer} package.
 An extract function for mer objects from the (old) \pkg{lme4} package.
 }
 
+\item{\code{extract.mnlogit}}{
+An extract function for mnlogit objects from the \pkg{mnlogit} package.
+}
+
 \item{\code{extract.multinom}}{
 An extract function for multinom objects from the \pkg{nnet} package.
 }
@@ -196,6 +203,10 @@ An extract function for nlme objects from the \pkg{nlme} package.
 
 \item{\code{extract.nlmerMod}}{
 An extract function for nlmerMod objects from the (old) \pkg{lme4} package.
+}
+
+\item{\code{extract.pgmm}}{
+An extract function for pgmm objects from the \pkg{plm} package.
 }
 
 \item{\code{extract.phreg}}{
@@ -224,6 +235,10 @@ An extract function for rlm objects from the \pkg{MASS} package.
 
 \item{\code{extract.rq}}{
 An extract function for rq objects from the \pkg{quantreg} package.
+}
+
+\item{\code{extract.sarlm}}{
+An extract function for sarlm objects from the \pkg{spdep} package.
 }
 
 \item{\code{extract.sclm}}{
