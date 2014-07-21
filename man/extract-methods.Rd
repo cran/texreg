@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{extract-methods}
 \alias{extract,aftreg-method}
+\alias{extract,Arima-method}
 \alias{extract,betareg-method}
 \alias{extract,brglm-method}
 \alias{extract,btergm-method}
@@ -18,6 +19,8 @@
 \alias{extract,gee-method}
 \alias{extract,glm-method}
 \alias{extract,glmerMod-method}
+\alias{extract,glmmadmb-method}
+\alias{extract,glmrob-method}
 \alias{extract,gls-method}
 \alias{extract,gmm-method}
 \alias{extract,hurdle-method}
@@ -36,6 +39,7 @@
 \alias{extract,negbin-method}
 \alias{extract,nlme-method}
 \alias{extract,nlmerMod-method}
+\alias{extract,ols-method}
 \alias{extract,pgmm-method}
 \alias{extract,phreg-method}
 \alias{extract,plm-method}
@@ -67,6 +71,10 @@ Methods for function \code{extract} in package \pkg{texreg}.
 
 \item{\code{extract.aftreg}}{
 An extract function for aftreg objects from the \pkg{eha} package.
+}
+
+\item{\code{extract.Arima}}{
+An extract function for Arima objects from the \pkg{stats} package.
 }
 
 \item{\code{extract.betareg}}{
@@ -131,6 +139,14 @@ An extract function for glm objects from the \pkg{stats} package.
 
 \item{\code{extract.glmerMod}}{
 An extract function for glmerMod objects from the (old) \pkg{lme4} package.
+}
+
+\item{\code{extract.glmmadmb}}{
+An extract function for glmmadmb objects from the \pkg{glmmADMB} package.
+}
+
+\item{\code{extract.glmrob}}{
+An extract function for glmrob objects from the \pkg{robustbase} package.
 }
 
 \item{\code{extract.gls}}{
@@ -203,6 +219,10 @@ An extract function for nlme objects from the \pkg{nlme} package.
 
 \item{\code{extract.nlmerMod}}{
 An extract function for nlmerMod objects from the (old) \pkg{lme4} package.
+}
+
+\item{\code{extract.ols}}{
+An extract function for ols objects from the \pkg{rms} package.
 }
 
 \item{\code{extract.pgmm}}{

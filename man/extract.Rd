@@ -1,6 +1,7 @@
 \name{extract}
 \alias{extract}
 \alias{extract.aftreg}
+\alias{extract.Arima}
 \alias{extract.betareg}
 \alias{extract.brglm}
 \alias{extract.btergm}
@@ -17,6 +18,8 @@
 \alias{extract.gee}
 \alias{extract.glm}
 \alias{extract.glmerMod}
+\alias{extract.glmmadmb}
+\alias{extract.glmrob}
 \alias{extract.gls}
 \alias{extract.gmm}
 \alias{extract.hurdle}
@@ -35,6 +38,7 @@
 \alias{extract.negbin}
 \alias{extract.nlme}
 \alias{extract.nlmerMod}
+\alias{extract.ols}
 \alias{extract.pgmm}
 \alias{extract.phreg}
 \alias{extract.plm}
@@ -65,6 +69,9 @@ extract(model, ...)
 extract.aftreg(model, include.loglik = TRUE, include.lr = TRUE, 
     include.nobs = TRUE, include.events = TRUE, include.trisk = TRUE, 
     ...)
+
+extract.Arima(model, include.pvalues = FALSE, include.aic = TRUE, 
+    include.loglik = TRUE, ...)
 
 extract.betareg(model, include.precision = TRUE, 
     include.pseudors = TRUE, include.loglik = TRUE, 
@@ -127,6 +134,14 @@ extract.glmerMod(model, naive = FALSE, nsim = 1000,
     include.loglik = TRUE, include.deviance = TRUE, 
     include.nobs = TRUE, include.groups = TRUE, 
     include.variance = TRUE, ...)
+
+extract.glmmadmb(model, include.variance = TRUE, 
+    include.dispersion = TRUE, include.zero = TRUE, 
+    include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.nobs = TRUE, 
+    include.groups = TRUE, ...)
+
+extract.glmrob(model, include.nobs = TRUE, ...)
 
 extract.gls(model, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, include.nobs = TRUE, ...)
@@ -199,6 +214,10 @@ extract.nlmerMod(model, naive = FALSE, nsim = 1000,
     include.nobs = TRUE, include.groups = TRUE, 
     include.variance = TRUE, ...)
 
+extract.ols(model, include.nobs = TRUE, include.rsquared = TRUE, 
+    include.adjrs = TRUE, include.fstatistic = FALSE, 
+    include.lr = TRUE, ...)
+
 extract.pgmm(model, include.nobs = TRUE, include.sargan = TRUE, 
     include.wald = TRUE, ...)
 
@@ -224,8 +243,8 @@ extract.rlm(model, include.nobs = TRUE, ...)
 extract.rq(model, include.nobs = TRUE, include.percentile = TRUE, 
     ...)
 
-extract.sarlm(model, include.nobs = TRUE, include.aic = TRUE, 
-    include.loglik = TRUE, include.wald = TRUE, ...)
+extract.sarlm(model, include.nobs = TRUE, include.lambda = TRUE, 
+    include.aic = TRUE, include.loglik = TRUE, include.wald = TRUE, ...)
 
 extract.sclm(model, include.thresholds = TRUE, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, include.nobs = TRUE, 
@@ -307,6 +326,7 @@ to convert them into texreg objects.
 \item{include.groups}{ If available: should the number of groups in a mixed-effects model (or \code{k} alternatives in a multinomial choice model) be reported? }
 \item{include.intercept}{ If available: should the intercept be included in the GOF block? }
 \item{include.iterations}{ If available: should the number of iterations be included? }
+\item{include.lambda}{ If available: should the lambda statistic and p-value be reported? }
 \item{include.loglik}{ If available: should the log-likelihood be reported? }
 \item{include.lr}{ If available: should the likelihood ratio test be reported? }
 \item{include.maxrs}{If available: should the maximum possible R-squared be reported? }

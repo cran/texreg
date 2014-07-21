@@ -3,8 +3,8 @@
 coefplot <- function(labels, estimates, lower.inner = NULL, 
     upper.inner = NULL, lower.outer = NULL, upper.outer = NULL, 
     signif.outer = TRUE, xlab = "Coefficients and confidence intervals", 
-    main = "Coefficient plot", vertical.lines = TRUE, cex = 2.5, 
-    lwd.inner = 7, lwd.outer = 5, signif.light = "#fbc9b9", 
+    main = "Coefficient plot", xlim = NULL, cex = 2.5, lwd.zerobar = 4, 
+    lwd.vbars = 1, lwd.inner = 7, lwd.outer = 5, signif.light = "#fbc9b9", 
     signif.medium = "#f7523a", signif.dark = "#bd0017", 
     insignif.light = "#c5dbe9", insignif.medium = "#5a9ecc", 
     insignif.dark = "#1c5ba6", ...) {
@@ -41,8 +41,13 @@ coefplot <- function(labels, estimates, lower.inner = NULL,
   if (mx < 0) {
     mx <- 0
   }
+  if (!is.null(xlim) && length(xlim) == 2 && is.numeric(xlim)) {
+    mn <- xlim[1]
+    mx <- xlim[2]
+  }
   steps <- floor(mn):ceiling(mx)
   num <- length(labels)
+  
   
   # which terms are significant?
   if (class(signif.outer) == "logical" && 
@@ -79,12 +84,10 @@ coefplot <- function(labels, estimates, lower.inner = NULL,
   axis(side = 1, las = 0, lty = 0)
   
   # add vertical gray lines
-  if (vertical.lines == TRUE) {
-    zeros <- rep(0, length(steps))
-    ends <- rep((num + 1), length(steps))
-    segments(steps, zeros, steps, ends, col = "gray", lwd = 1)
-  }
-  segments(0, 0, 0, num + 1, lwd = 4, col = "grey75")
+  zeros <- rep(0, length(steps))
+  ends <- rep((num + 1), length(steps))
+  segments(steps, zeros, steps, ends, col = "gray", lwd = lwd.vbars)
+  segments(0, 0, 0, num + 1, lwd = lwd.zerobar, col = "grey75")
   
   # draw outer CIs
   if (outer == TRUE) {
@@ -130,17 +133,21 @@ coefplot <- function(labels, estimates, lower.inner = NULL,
 
 
 # plotreg function
-plotreg <- function(l, file = NA, custom.model.names = NULL, 
+plotreg <- function(l, file = NULL, custom.model.names = NULL, 
     custom.coef.names = NULL, custom.note = NULL, override.coef = 0, 
-    override.se = 0, override.pval = 0, omit.coef = NA, reorder.coef = NULL, 
-    ci.level = 0.95, use.se = FALSE, mfrow = TRUE, vertical.lines = TRUE, 
-    cex = 2.5, lwd.inner = 7, lwd.outer = 5, signif.light = "#fbc9b9", 
-    signif.medium = "#f7523a", signif.dark = "#bd0017", 
-    insignif.light = "#c5dbe9", insignif.medium = "#5a9ecc", 
-    insignif.dark = "#1c5ba6", ...) {
+    override.se = 0, override.pval = 0, override.ci.low = 0, 
+    override.ci.up = 0, omit.coef = NULL, reorder.coef = NULL, 
+    ci.level = 0.95, use.se = FALSE, mfrow = TRUE, xlim = NULL, 
+    cex = 2.5, lwd.zerobar = 4, lwd.vbars = 1, lwd.inner = 7, 
+    lwd.outer = 5, signif.light = "#fbc9b9", signif.medium = "#f7523a", 
+    signif.dark = "#bd0017", insignif.light = "#c5dbe9", 
+    insignif.medium = "#5a9ecc", insignif.dark = "#1c5ba6", ...) {
   
-  if (!is.na(omit.coef) && !is.character(omit.coef)) {
+  if (!is.null(omit.coef) && !is.na(omit.coef) && !is.character(omit.coef)) {
     stop("omit.coef must be a character string!")
+  }
+  if (is.null(omit.coef)) {
+    omit.coef <- NA
   }
   
   if (length(use.se) == 1) {
@@ -149,7 +156,8 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
   
   # extract texreg objects and override data
   models <- get.data(l, ...)
-  models <- override(models, override.coef, override.se, override.pval)
+  models <- override(models, override.coef, override.se, override.pval, 
+      override.ci.low, override.ci.up)
   
   # custom model names
   model.names <- character()
@@ -165,7 +173,7 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
   }
   
   # file output; check file extension
-  if (!is.na(file)) {
+  if (!is.null(file) && !is.na(file)) {
     if (grepl(".pdf$", file)) {
       pdf(file, ...)
     } else if (grepl(".jpe*g$", file)) {
@@ -258,8 +266,8 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
       co <- dataframe[, 2]
       se <- dataframe[, 3]
       note <- "Bars denote SEs."
-      cat(paste0("Model ", i, 
-        ": bars denote one (inner) resp. two (outer) standard errors.\n"))
+      message(paste0("Model ", i, 
+        ": bars denote one (inner) resp. two (outer) standard errors."))
     } else if (length(models[[i]]@ci.low) == 0 && length(models[[i]]@se) > 0) {
       co <- models[[i]]@coef
       co.names <- models[[i]]@coef.names
@@ -287,8 +295,8 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
       
       signif.outer <- TRUE
       note <- "Bars denote CIs."
-      cat(paste0("Model ", i, ": bars denote 0.5 (inner) resp. ", ci.level, 
-          " (outer) confidence intervals (computed from standard errors).\n"))
+      message(paste0("Model ", i, ": bars denote 0.5 (inner) resp. ", ci.level, 
+          " (outer) confidence intervals (computed from standard errors)."))
     } else {
       co <- models[[i]]@coef
       co.names <- models[[i]]@coef.names
@@ -311,8 +319,8 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
       
       signif.outer <- TRUE
       note <- "Bars denote CIs."
-      cat(paste0("Model ", i, ": bars denote 0.5 (inner) resp. ", ci.level, 
-          " (outer) confidence intervals.\n"))
+      message(paste0("Model ", i, ": bars denote  ", ci.level, 
+          " confidence intervals."))
     }
     
     if (!is.null(custom.note)) {
@@ -326,6 +334,27 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
           "coefficients."))
     }
     
+    # xlim argument
+    if (!is.null(xlim)) {
+      if (is.numeric(xlim) && length(xlim) == 2) {
+        xl <- xlim
+      } else if (length(xlim) != 2 || class(xlim) != "list") {
+        stop(paste("Horizontal limits ('xlim' argument) must be provided as", 
+            "a vector of two numerics or as a list of such vectors where each", 
+            "item corresponds to a model."))
+      } else if (class(xlim) == "list") {
+        if (length(xlim) != length(models)) {
+            stop(paste("There are", length(models), "models but", length(xlim), 
+                "xlim items."))
+        }
+        xl <- xlim[[i]]
+      } else {
+        xl <- NULL
+      }
+    } else {
+      xl <- xlim
+    }
+    
     # plot
     coefplot(
         labels = co.names, 
@@ -337,8 +366,10 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
         signif.outer = signif.outer,
         xlab = note, 
         main = model.names[i], 
-        vertical.lines = vertical.lines, 
+        xlim = xl, 
         cex = cex, 
+        lwd.zerobar = lwd.zerobar, 
+        lwd.vbars = lwd.vbars, 
         lwd.inner = lwd.inner, 
         lwd.outer = lwd.outer, 
         signif.light = signif.light,
@@ -351,7 +382,7 @@ plotreg <- function(l, file = NA, custom.model.names = NULL,
     )
   }
   
-  if (!is.na(file)) {
+  if (!is.null(file) && !is.na(file)) {
     dev.off()
   }
 }
