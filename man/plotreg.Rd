@@ -5,27 +5,28 @@
 \description{Create coefficient plots from statistical model output.}
 \usage{
 
-plotreg(l, file = NA, custom.model.names = NULL, 
+plotreg(l, file = NULL, custom.model.names = NULL, 
     custom.coef.names = NULL, custom.note = NULL, 
     override.coef = 0, override.se = 0, override.pval = 0, 
-    omit.coef = NA, reorder.coef = NULL, ci.level = 0.95, 
-    use.se = FALSE, mfrow = TRUE, vertical.lines = TRUE, 
-    cex = 2.5, lwd.inner = 7, lwd.outer = 5, 
-    signif.light = "#fbc9b9", signif.medium = "#f7523a", 
-    signif.dark = "#bd0017", insignif.light = "#c5dbe9", 
-    insignif.medium = "#5a9ecc", insignif.dark = "#1c5ba6", 
-    ...)
+    override.ci.low = 0, override.ci.up = 0, 
+    omit.coef = NULL, reorder.coef = NULL, ci.level = 0.95, 
+    use.se = FALSE, mfrow = TRUE, xlim = NULL, cex = 2.5, 
+    lwd.zerobar = 4, lwd.vbars = 1, lwd.inner = 7, 
+    lwd.outer = 5, signif.light = "#fbc9b9", 
+    signif.medium = "#f7523a", signif.dark = "#bd0017", 
+    insignif.light = "#c5dbe9", insignif.medium = "#5a9ecc", 
+    insignif.dark = "#1c5ba6", ...)
 
 coefplot(labels, estimates, lower.inner = NULL, 
     upper.inner = NULL, lower.outer = NULL, 
     upper.outer = NULL, signif.outer = TRUE, 
     xlab = "Coefficients and confidence intervals", 
-    main = "Coefficient plot", vertical.lines = TRUE, 
-    cex = 2.5, lwd.inner = 7, lwd.outer = 5, 
-    signif.light = "#fbc9b9", signif.medium = "#f7523a", 
-    signif.dark = "#bd0017", insignif.light = "#c5dbe9", 
-    insignif.medium = "#5a9ecc", insignif.dark = "#1c5ba6", 
-    ...)
+    main = "Coefficient plot", xlim = NULL, 
+    cex = 2.5, lwd.zerobar = 4, lwd.vbars = 1, 
+    lwd.inner = 7, lwd.outer = 5, signif.light = "#fbc9b9", 
+    signif.medium = "#f7523a", signif.dark = "#bd0017", 
+    insignif.light = "#c5dbe9", insignif.medium = "#5a9ecc", 
+    insignif.dark = "#1c5ba6", ...)
 }
 \details{
 The \code{coefplot} function produces coefficient plots (i.e., forest plots applied to point estimates and confidence intervals). It accepts raw data (the lower and upper bounds of inner and outer confidence intervals as well as the point estimates and their names) as input data. Significant coefficients and intervals can be plotted in a different color.
@@ -42,12 +43,16 @@ The \code{plotreg} function is a wrapper for the \code{coefplot} function and wo
 \item{override.coef}{Set custom values for the coefficients. New coefficients are provided as a list of numeric vectors. The list contains vectors of coefficients for each model. There must be as many vectors of coefficients as there are models. For example, if there are two models with three model terms each, the argument could be specified as \code{override.coef = list(c(0.1, 0.2, 0.3), c(0.05, 0.06, 0.07))}. If there is only one model, custom values can be provided as a plain vector (not embedded in a list). For example: \code{override.coef = c(0.05, 0.06, 0.07)}.}
 \item{override.se}{Set custom values for the standard errors. This only has an effect where standard errors are converted into confidence intervals because no other CIs are present. New standard errors are provided as a list of numeric vectors. The list contains vectors of standard errors for each model. There must be as many vectors of standard errors as there are models. For example, if there are two models with three coefficients each, the argument could be specified as \code{override.se = list(c(0.1, 0.2, 0.3), c(0.05, 0.06, 0.07))}. If there is only one model, custom values can be provided as a plain vector (not embedded in a list). For example: \code{override.se = c(0.05, 0.06, 0.07)}. Overriding standard errors can be useful for the implementation of robust SEs, for example.}
 \item{override.pval}{Set custom values for the p values. This only has an effect where standard errors are converted into confidence intervals because no other CIs are present. In this case, significance is derived from the p values rather than the confidence intervals. New p values are provided as a list of numeric vectors. The list contains vectors of p values for each model. There must be as many vectors of p values as there are models. For example, if there are two models with three coefficients each, the argument could be specified as \code{override.pval = list(c(0.1, 0.2, 0.3), c(0.05, 0.06, 0.07))}. If there is only one model, custom values can be provided as a plain vector (not embedded in a list). For example: \code{override.pval = c(0.05, 0.06, 0.07)}. Overriding p values can be useful for the implementation of robust SEs and p values, for example.}
+\item{override.ci.low}{Set custom lower confidence interval bounds. This works like the other override arguments, with one exception: if confidence intervals are provided here and in the \code{override.ci.up} argument, the standard errors and p values as well as the \code{ci.force} argument are ignored.}
+\item{override.ci.up}{Set custom upper confidence interval bounds. This works like the other override arguments, with one exception: if confidence intervals are provided here and in the \code{override.ci.low} argument, the standard errors and p values as well as the \code{ci.force} argument are ignored.}
 \item{omit.coef}{A character string which is used as a regular expression to remove coefficient rows from the table. For example, \code{omit.coef = "group"} deletes all coefficient rows from the diagram where the name of the coefficient contains the character sequence "group". More complex regular expressions can be used to filter out several kinds of model terms, for example \code{omit.coef = "(thresh)|(ranef)"} to remove all model terms matching either "thresh" or "ranef".The \code{omit.coef} argument is processed after the \code{custom.coef.names} argument, so the regular expression should refer to the custom coefficient names.}
 \item{reorder.coef}{Reorder the rows of the coefficient block of the resulting table in a custom way. The argument takes a vector of the same length as the number of coefficients. For example, if there are three coefficients, \code{reorder.coef = c(3, 2, 1)} will put the third coefficient in the first row and the first coefficient in the third row. Reordering can be sensible because interaction effects are often added to the end of the model output although they were specified earlier in the model formula. Note: Reordering takes place after processing custom coefficient names and after omitting coefficients, so the \code{custom.coef.names} and \code{omit.coef} arguments should follow the original order.}
 \item{ci.level}{If standard errors are converted to confidence intervals (because a model does not natively support CIs), what confidence level should be used for the outer confidence interval? By default, \code{0.95} is used (i.e., an alpha value of 0.05).}
 \item{use.se}{Use one standard error for the inner horizontal bar and two standard errors from the estimate for the outer horizontal bar (instead of confidence intervals). Only available if standard errors can be extracted from the model using the respective \code{\link{extract}} function.}
 \item{mfrow}{If multiple models are handed over as the \code{l} argument, several plots are produced. If \code{mfrow = TRUE} is set, multiple diagrams are aligned on the same page. If \code{mfrow = FALSE} is set, each diagram per model comes out as a separate plot.}
-\item{vertical.lines}{Should gray vertical lines be plotted in the background for better orientation?}
+\item{xlim}{Horizontal limits. In the \code{coefplot} function, they must be provided as a vector with two numeric, e.g., \code{xlim = c(-5, 5)} for displaying a range from \code{-5} to \code{+5}. In the \code{plotreg} function, they can be provided either as such a vector with two values or as a list of vectors (with each entry corresponding to a model in \code{l}). }
+\item{lwd.zerobar}{ Line width of the vertical gray bar at the \code{x} value of \code{0}. To remove the line, set \code{lwd.zerobar = 0}. }
+\item{lwd.vbars}{ Line width of the thin vertical gray bars. To remove them completely, set \code{lwd.vbars = 0}. }
 
 \item{labels}{The names of the model terms. They are arranged on the left axis.}
 \item{estimates}{The coefficients (point estimates) of the model terms. They are depicted as bold dots in the coefficient plot.}

@@ -9,7 +9,9 @@
   packageStartupMessage(
       'Version:  ', desc$Version, '\n', 
       'Date:     ', desc$Date, '\n',
-      'Author:   ', 'Philip Leifeld (University of Konstanz)'
+      'Author:   ', 'Philip Leifeld (University of Konstanz)', '\n\n', 
+      'Please cite the JSS article in your publications ', 
+      '-- see citation("texreg").'
   )
 }
 
@@ -86,7 +88,7 @@ rearrangeMatrix <- function(m) {
 get.data <- function(l, ...) {
 
   # if a single model is handed over, put model inside a list
-  if (!"list" %in% class(l)) {
+  if (!"list" %in% class(l)[1]) {
     l <- list(l)
   }
 
@@ -123,7 +125,8 @@ get.gof <- function(models) {
 
 
 # function which replaces coefs, SEs and p values by custom values if provided
-override <- function(models, override.coef, override.se, override.pval) {
+override <- function(models, override.coef, override.se, override.pval, 
+    override.ci.low, override.ci.up) {
   
   for (i in 1:length(models)) {
     
@@ -208,6 +211,71 @@ override <- function(models, override.coef, override.se, override.pval) {
       pval <- override.pval[[i]]
     }
     models[[i]]@pvalues <- pval
+    
+    # lower bound of confidence intervals
+    if (is.null(override.ci.low)) {
+      # do nothing
+    } else if (class(override.ci.low) != "list" && length(override.ci.low) 
+        == 1 && override.ci.low == 0) {
+      ci.low <- models[[i]]@ci.low
+    } else if (class(override.ci.low) == "numeric" && length(models) == 1 && 
+        length(override.ci.low) == length(models[[i]]@coef)) {
+      ci.low <- override.ci.low
+    } else if (class(override.ci.low) != "list") {
+      warning("CIs must be provided as a list. Using default CIs if available.")
+      ci.low <- models[[i]]@ci.low
+    } else if (length(override.ci.low) != length(models)) {
+      warning(paste("Number of lower CIs provided does not match number of", 
+          "models. Using default CIs if available."))
+      ci.low <- models[[i]]@ci.low
+    } else if (length(models[[i]]@coef) != length(override.ci.low[[i]])) {
+      # previous line: comparison with coef because CIs can be empty
+      warning(paste0("Number of lower CIs provided does not match number of ", 
+          "coefficients in model ", i, ". Using default CIs if available."))
+      ci.low <- models[[i]]@ci.low
+    } else if (class(override.ci.low[[i]]) != "numeric") {
+      warning(paste("Lower CIs provided for model", i, 
+          "are not numeric. Using default lower CIs."))
+      ci.low <- models[[i]]@ci.low
+    } else {
+      ci.low <- override.ci.low[[i]]
+    }
+    models[[i]]@ci.low <- ci.low
+    
+    # upper bound of confidence intervals
+    if (is.null(override.ci.up)) {
+      # do nothing
+    } else if (class(override.ci.up) != "list" && length(override.ci.up) 
+        == 1 && override.ci.up == 0) {
+      ci.up <- models[[i]]@ci.up
+    } else if (class(override.ci.up) == "numeric" && length(models) == 1 && 
+        length(override.ci.up) == length(models[[i]]@coef)) {
+      ci.up <- override.ci.up
+    } else if (class(override.ci.up) != "list") {
+      warning("CIs must be provided as a list. Using default CIs if available.")
+      ci.up <- models[[i]]@ci.up
+    } else if (length(override.ci.up) != length(models)) {
+      warning(paste("Number of lower CIs provided does not match number of", 
+          "models. Using default CIs if available."))
+      ci.up <- models[[i]]@ci.up
+    } else if (length(models[[i]]@coef) != length(override.ci.up[[i]])) {
+      # previous line: comparison with coef because CIs can be empty
+      warning(paste0("Number of lower CIs provided does not match number of ", 
+          "coefficients in model ", i, ". Using default CIs if available."))
+      ci.up <- models[[i]]@ci.up
+    } else if (class(override.ci.up[[i]]) != "numeric") {
+      warning(paste("Lower CIs provided for model", i, 
+          "are not numeric. Using default lower CIs."))
+      ci.up <- models[[i]]@ci.up
+    } else {
+      ci.up <- override.ci.up[[i]]
+    }
+    models[[i]]@ci.up <- ci.up
+    
+    if (length(models[[i]]@ci.low) > 0 && length(models[[i]]@ci.up) > 0) {
+      models[[i]]@se <- numeric()
+      models[[i]]@pvalues <- numeric()
+    }
   }
   
   return(models)
@@ -418,8 +486,8 @@ customnames <- function(m, custom.names) {
 
 # remove coefficient rows that match the omit.coef regular expression
 omitcoef <- function(m, omit.coef) {
-  if (!is.na(omit.coef)) {
-    if (!is.character(omit.coef)) {
+  if (!is.null(omit.coef)) {
+    if (!is.character(omit.coef) || is.na(omit.coef)) {
       stop("omit.coef must be a character string!")
     }
     remove.rows <- grep(omit.coef, rownames(m))
@@ -436,29 +504,44 @@ omitcoef <- function(m, omit.coef) {
 
 
 # decide if default or custom model names should be used and return them
-modelnames <- function(models, model.names) {
-  if (is.null(model.names)) {
-    return(paste("Model", 1:length(models)))
-  } else if (length(model.names) > 1) {
-    if (class(model.names) != "character") {
-      stop("Model names must be specified as a vector of strings.")
-    } else if (length(model.names) != length(models)) {
-      stop(paste("There are", length(models), "models, but you provided", 
-          length(model.names), "names for them."))
-    } else {
-      return(model.names)
-    }
-  } else if (!is.na(model.names) & class(model.names) != "character") {
-    stop("Model names must be specified as a vector of strings.")
-  } else if (class(model.names) == "character" & 
-      length(model.names) != length(models)) {
-    stop(paste("A single model name was specified. But there are in fact", 
-        length(models), "models."))
-  } else if (class(model.names) == "character") {
-    return(model.names)
-  } else {
-    return(paste("Model", 1:length(models)))
+modelnames <- function(model.list, tr.objects, model.names) {
+  
+  if (class(model.list)[1] != "list") {
+    model.list <- list(model.list)
   }
+  
+  mnames <- names(model.list)
+  if (is.null(mnames)) {
+    mnames <- character(length(model.list))
+  }
+  
+  for (i in 1:length(tr.objects)) {
+    nam <- tr.objects[[i]]@model.name
+    if (length(nam) == 1) {
+      model.names[i] <- nam
+    }
+  }
+  
+  if (is.null(model.names)) {
+    model.names <- rep(NA, length(model.list))
+  } else if (class(model.names) != "character") {
+    stop("Model names must be specified as a vector of strings.")
+  } else if (length(model.names) != length(tr.objects)) {
+    stop(paste("There are", length(tr.objects), "models, but you provided", 
+        length(model.names), "name(s) for them."))
+  }
+  
+  for (i in 1:length(model.names)) {
+    if (!is.na(model.names[i])) {
+      mnames[i] <- model.names[i]
+    } else if (mnames[i] == "") {
+      mnames[i] <- paste("Model", i)
+    } else {
+      # leave mnames[i] as is
+    }
+  }
+  
+  return(mnames)
 }
 
 
@@ -759,9 +842,8 @@ format.column <- function(x, single.row = FALSE, digits = 2) {
       first <- paste0(zeros, first)
       last <- sub("(.*?)\\[(.+?); (.+?)\\](.*?)$", "\\3", x[i])
       difference <- ci.upper.length - nchar(last)
-      zeros <- rep(" ", difference, collapse = "")
+      zeros <- paste(rep(" ", difference), collapse = "")
       last <- paste0(zeros, last)
-      #x[i] <- paste0(whitespace1, "[", first, "; ", last, "]", whitespace2)
       x[i] <- paste0(whitespace1, "[", first, "; ", last, "]", whitespace2)
     }
   }
@@ -979,4 +1061,9 @@ grouping <- function(output.matrix, groups, indentation = "    ",
     }
   }
   return(output.matrix)
+}
+
+# print method for texreg table strings
+print.texregTable <- function(x, ...) {
+  cat(x, ...)
 }
