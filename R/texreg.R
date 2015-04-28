@@ -670,7 +670,8 @@ htmlreg <- function(l, file = NULL, single.row = FALSE,
     reorder.gof = NULL, ci.force = FALSE, ci.force.level = 0.95, ci.test = 0, 
     groups = NULL, bold = 0.00, center = TRUE, caption = "Statistical models", 
     caption.above = FALSE, star.symbol = "*", inline.css = TRUE, 
-    doctype = TRUE, html.tag = FALSE, head.tag = FALSE, body.tag = FALSE, ...) {
+    doctype = TRUE, html.tag = FALSE, head.tag = FALSE, body.tag = FALSE, 
+    indentation = "", vertical.align.px = 0, ...) {
   
   stars <- check.stars(stars)
   
@@ -687,7 +688,7 @@ htmlreg <- function(l, file = NULL, single.row = FALSE,
         "border-bottom: 2px solid black;\"")
     css.td <- " style=\"padding-right: 12px; border: none;\""
     css.caption <- ""
-    css.sup <- " style=\"vertical-align: 4px;\""
+    css.sup <- paste0(" style=\"vertical-align: ", vertical.align.px, "px;\"")
   } else {
     css.table <- ""
     css.th <- ""
@@ -767,22 +768,22 @@ htmlreg <- function(l, file = NULL, single.row = FALSE,
   }
   
   # determine indentation for table
+  ind <- indentation
   if (html.tag == TRUE) {
-    h.ind <- "  "
+    h.ind <- indentation
   } else {
     h.ind <- ""
   }
   if (body.tag == TRUE) {
-    b.ind <- "  "
+    b.ind <- indentation
   } else {
     b.ind <- ""
   }
   if (head.tag == TRUE) {
-    d.ind <- "  "
+    d.ind <- indentation
   } else {
     d.ind <- ""
   }
-  ind <- "  "
   
   # horizontal table alignment
   if (center == FALSE) {
@@ -838,7 +839,7 @@ htmlreg <- function(l, file = NULL, single.row = FALSE,
         h.ind, d.ind, ind, ind, "border: none;\n", 
         h.ind, d.ind, ind, "}\n", 
         h.ind, d.ind, ind, "sup {\n", 
-        h.ind, d.ind, ind, ind, "vertical-align: 4px;\n", 
+        h.ind, d.ind, ind, ind, "vertical-align: ", vertical.align.px, "px;\n", 
         h.ind, d.ind, ind, "}\n", 
         h.ind, d.ind, "</style>\n"
     )
