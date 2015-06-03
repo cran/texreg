@@ -3554,3 +3554,29 @@ extract.hurdle <- extract.zeroinfl
 setMethod("extract", signature = className("hurdle", "pscl"), 
     definition = extract.hurdle)
 
+extract.speedlm <- function (model) {
+	s = summary(model)
+	name = rownames(s$coefficients)
+	co <- s$coefficients$coef
+	se <- s$coefficients$se
+	pval <- s$coefficients$p.value
+
+	rs <- s$r.squared
+	adj <- s$adj.r.squared
+	n <- s$nobs
+
+	gof <- c(rs, adj, n)
+	gof.names <- c("R$^2$", "Adj.\\ R$^2$", "Num.\\ obs.")
+
+	tr <- createTexreg(
+		coef.names = name,
+		coef = co,
+		se = se,
+		pvalues = pval,
+		gof.names = gof.names,
+		gof = gof
+		)
+	return(tr)
+}
+
+setMethod("extract", signature = className("speedlm", "speedglm"), definition = extract.speedlm) 
