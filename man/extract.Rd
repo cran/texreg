@@ -5,8 +5,12 @@
 \alias{extract,aftreg-method}
 \alias{extract.Arima}
 \alias{extract,Arima-method}
+\alias{extract.ARIMA}
+\alias{extract,ARIMA-method}
 \alias{extract.averaging}
 \alias{extract,averaging-method}
+\alias{extract.bam}
+\alias{extract,bam-method}
 \alias{extract.betareg}
 \alias{extract,betareg-method}
 \alias{extract.brglm}
@@ -31,8 +35,14 @@
 \alias{extract,ergm-method}
 \alias{extract.ergmm}
 \alias{extract,ergmm-method}
+\alias{extract.ets}
+\alias{extract,ets-method}
+\alias{extract.felm}
+\alias{extract,felm-method}
 \alias{extract.fGARCH}
 \alias{extract,fGARCH-method}
+\alias{extract.forecast}
+\alias{extract,forecast-method}
 \alias{extract.gam}
 \alias{extract,gam-method}
 \alias{extract.gamlss}
@@ -67,6 +77,8 @@
 \alias{extract,lmrob-method}
 \alias{extract.lnam}
 \alias{extract,lnam-method}
+\alias{extract.lqmm}
+\alias{extract,lqmm-method}
 \alias{extract.lrm}
 \alias{extract,lrm-method}
 \alias{extract.maBina}
@@ -79,6 +91,8 @@
 \alias{extract,mnlogit-method}
 \alias{extract.model.selection}
 \alias{extract,model.selection-method}
+\alias{extract.mtergm}
+\alias{extract,mtergm-method}
 \alias{extract.multinom}
 \alias{extract,multinom-method}
 \alias{extract.negbin}
@@ -155,8 +169,19 @@ extract(model, ...)
 \S4method{extract}{Arima}(model, include.pvalues = FALSE, 
     include.aic = TRUE, include.loglik = TRUE, ...)
 
+\S4method{extract}{ARIMA}(model, include.pvalues = FALSE, 
+    include.aic = TRUE, include.aicc = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, ...)
+
 \S4method{extract}{averaging}(model, use.ci = FALSE, 
     adjusted.se = FALSE, include.nobs = TRUE, ...)
+
+\S4method{extract}{bam}(model, include.smooth = TRUE, 
+    include.aic = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, include.deviance = TRUE, 
+    include.dev.expl = TRUE, include.dispersion = TRUE, 
+    include.rsquared = TRUE, include.gcv = TRUE, 
+    include.nobs = TRUE, include.nsmooth = TRUE, ...)
 
 \S4method{extract}{betareg}(model, include.precision = TRUE, 
     include.pseudors = TRUE, include.loglik = TRUE, 
@@ -166,7 +191,8 @@ extract(model, ...)
     include.bic = TRUE, include.loglik = TRUE, 
     include.deviance = TRUE, include.nobs = TRUE, ...)
 
-\S4method{extract}{btergm}(model, level = 0.95, ...)
+\S4method{extract}{btergm}(model, level = 0.95, 
+    include.nobs = TRUE, ...)
 
 \S4method{extract}{censReg}(model, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
@@ -202,8 +228,18 @@ extract(model, ...)
 
 \S4method{extract}{ergmm}(model, include.bic = TRUE, ...)
 
+\S4method{extract}{ets}(model, include.pvalues = FALSE, 
+    include.aic = TRUE, include.aicc = TRUE, include.bic = TRUE, 
+    include.loglik = TRUE, ...)
+
+\S4method{extract}{felm}(model, include.nobs = TRUE, 
+    include.rsquared = TRUE, include.adjrs = TRUE, 
+    include.fstatistic = FALSE, ...)
+
 \S4method{extract}{fGARCH}(model, include.nobs = TRUE, 
     include.aic = TRUE, include.loglik = TRUE, ...)
+
+\S4method{extract}{forecast}(model, ...)
 
 \S4method{extract}{gam}(model, include.smooth = TRUE, 
     include.aic = TRUE, include.bic = TRUE, 
@@ -282,6 +318,11 @@ extract(model, ...)
     include.adjrs = TRUE, include.aic = TRUE, include.bic = TRUE, 
     include.loglik = TRUE, ...)
 
+\S4method{extract}{lqmm}(model, include.aic = TRUE, 
+    include.bic = TRUE, include.loglik = TRUE, 
+    include.nobs = TRUE, include.groups = TRUE, 
+    include.tau = FALSE, use.ci = FALSE, beside = TRUE, ...)
+
 \S4method{extract}{lrm}(model, include.pseudors = TRUE, 
     include.lr = TRUE, include.nobs = TRUE, ...)
 
@@ -306,9 +347,14 @@ extract(model, ...)
     include.aicc = TRUE, include.delta = TRUE, 
     include.weight = TRUE, include.nobs = TRUE, ...)
 
+\S4method{extract}{mtergm}(model, include.nobs = TRUE, 
+    include.aic = TRUE, include.bic = TRUE, include.loglik = TRUE, 
+    ...)
+    
 \S4method{extract}{multinom}(model, include.pvalues = TRUE, 
     include.aic = TRUE, include.bic = TRUE, include.loglik = TRUE, 
-    include.deviance = TRUE, include.nobs = TRUE, ...)
+    include.deviance = TRUE, include.nobs = TRUE, 
+    levels = model$lev, beside = TRUE, ...)
 
 \S4method{extract}{negbin}(model, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
@@ -360,8 +406,9 @@ extract(model, ...)
     include.percentile = TRUE, ...)
 
 \S4method{extract}{sarlm}(model, include.nobs = TRUE, 
-    include.lambda = TRUE, include.aic = TRUE, 
-    include.loglik = TRUE, include.wald = TRUE, ...)
+    include.aic = TRUE, include.loglik = TRUE, 
+    include.wald = TRUE, include.lambda = TRUE, 
+    include.rho = TRUE, ...)
 
 \S4method{extract}{sclm}(model, include.thresholds = TRUE, 
     include.aic = TRUE, include.bic = TRUE, include.loglik = TRUE, 
@@ -433,8 +480,16 @@ An extract method for aftreg objects from the \pkg{eha} package.
 An extract method for Arima objects from the \pkg{stats} package.
 }
 
+\item{\code{ARIMA}}{
+An extract method for ARIMA objects from the \pkg{forecast} package.
+}
+
 \item{\code{averaging}}{
 An extract method for averaging objects from the \pkg{MuMIn} package.
+}
+
+\item{\code{bam}}{
+An extract method for bam objects from the \pkg{mgcv} package.
 }
 
 \item{\code{betareg}}{
@@ -485,8 +540,20 @@ An extract method for ergm objects from the \pkg{ergm} package.
 An extract method for ergmm objects from the \pkg{latentnet} package.
 }
 
+\item{\code{ets}}{
+An extract method for ets objects from the \pkg{forecast} package.
+}
+
+\item{\code{felm}}{
+An extract method for felm objects from the \pkg{lfe} package.
+}
+
 \item{\code{fGARCH}}{
 An extract method for fGARCH objects from the \pkg{fGarch} package.
+}
+
+\item{\code{forecast}}{
+An extract method for forecast objects from the \pkg{forecast} package.
 }
 
 \item{\code{gam}}{
@@ -557,6 +624,10 @@ An extract method for lmrob objects from the \pkg{robustbase} package.
 An extract method for lnam objects from the \pkg{sna} package.
 }
 
+\item{\code{lqmm}}{
+An extract method for lqmm objects from the \pkg{lqmm} package.
+}
+
 \item{\code{lrm}}{
 An extract method for lrm objects from the \pkg{Design} or \pkg{rms} package.
 }
@@ -579,6 +650,10 @@ An extract method for mnlogit objects from the \pkg{mnlogit} package.
 
 \item{\code{model.selection}}{
 An extract method for model.selection objects from the \pkg{MuMIn} package.
+}
+
+\item{\code{mtergm}}{
+An extract method for mtergm objects from the \pkg{btergm} package.
 }
 
 \item{\code{multinom}}{
@@ -739,11 +814,13 @@ An extract method for zeroinfl objects from the \pkg{pscl} package.
 \item{include.precision}{ If available: should the precision estimates of a betareg fit (the phi coefficients) be reported as part of the coefficients block? }
 \item{include.pseudors}{ If available: should the pseudo R-squared be reported? }
 \item{include.pvalues}{ If available: should the p values be reported (naive p values are not recommended for lme4 models, but see also the \code{mcmc.pvalues} argument)? }
+\item{include.rho}{ If available: should the lambda statistic and p-value be reported? }
 \item{include.rmse}{ If available: should the root-mean-square error (= residual standard deviation) be reported? }
 \item{include.rsquared}{ If available: should R-squared be reported? }
 \item{include.sargan}{ If available: should the Sargan test be reported? }
 \item{include.selection}{ If available: should the selection component of a sample selection model be reported? }
 \item{include.smooth}{ If available: should the smooth terms of a GAM be reported? If they are reported, the EDF value is reported as the coefficient, and DF is included in parentheses (not standard errors because a chi-square test is used for the smooth terms). }
+\item{include.tau}{ If available: include tau in linear quantile mixed models? }
 \item{include.thresholds}{ If available: should the threshold parameters (that is, the intercepts for the class boundaries) be reported in ordinal models? }
 \item{include.trisk}{ If available: should the total time at risk be reported (in event-history models)? }
 \item{include.variance}{ If available: should group variances be reported? }
@@ -753,6 +830,7 @@ An extract method for zeroinfl objects from the \pkg{pscl} package.
 \item{include.zph}{ If available: should the Cox proportional hazards assumption be tested (resulting in a p value indicating whether the proportional hazards assumption of the model is violated)? }
 \item{jackknife}{ If available: use Jackknife variance instead of Asymptotic variance. }
 \item{level}{Confidence level (\code{1 - alpha}) for computing confidence intervals. }
+\item{levels}{ The names of the levels of a multinomial model that should be included in the table. Should be provided as a vector of character strings. }
 \item{method}{ The method used to compute confidence intervals or p values. In \pkg{lme4} models, the default value \code{"naive"} computes naive p values while the other methods compute confidence intervals using the \code{confint} function. }
 \item{nsim}{ In linear mixed effects models: the MCMC sample size or number of bootstrapping replications on the basis of which confidence intervals are computed (only if the \code{method} argument does not specify \code{"naive"}, which is the default behavior). Note: large values may take considerable computing time. }
 \item{prefix}{ Include prefix before the label of the coefficient in order to identify the current model component. }
