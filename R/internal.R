@@ -312,6 +312,10 @@ tex.replace <- function(models, type = "html", style = "") {
     models[[i]]@gof.names <- gsub("\\\\ ", " ", models[[i]]@gof.names)
     models[[i]]@gof.names <- gsub("\\ ", " ", models[[i]]@gof.names)
     
+    # extract.sarlm coefficient name replacement
+    models[[i]]@coef.names <- gsub("\\$\\\\rho\\$", "rho", models[[i]]@coef.names)
+    models[[i]]@coef.names <- gsub("\\$\\\\lambda\\$", "lambda", models[[i]]@coef.names)
+    
     # extract.gamlss coefficient name replacement
     models[[i]]@coef.names <- gsub("\\$\\\\mu\\$", "mu", models[[i]]@coef.names)
     models[[i]]@coef.names <- gsub("\\$\\\\nu\\$", "nu", models[[i]]@coef.names)
@@ -332,8 +336,6 @@ replaceSymbols <- function(m) {
       rn[i] <- gsub("_", "\\\\_", rn[i])
       rn[i] <- gsub("<", "\\$<\\$", rn[i])
       rn[i] <- gsub(">", "\\$>\\$", rn[i])
-      rn[i] <- gsub("\\{", "\\\\{", rn[i])
-      rn[i] <- gsub("\\}", "\\\\}", rn[i])
       rn[i] <- gsub("%", "\\\\%", rn[i])
     }
   }
@@ -381,13 +383,19 @@ aggregate.matrix <- function(models, gof.names, custom.gof.names, digits,
     pv <- models[[i]]@pvalues
     cil <- models[[i]]@ci.low
     ciu <- models[[i]]@ci.up
-    if (length(se) == 0) {
+    if (length(se) == 0 && length(ciu) > 0) {
       coef <- cbind(cf, cil, ciu)
     } else {
-      if (length(pv) > 0) {
+      if (length(se) > 0 && length(pv) > 0) {
         coef <- cbind(cf, se, pv)
-      } else { #p-values not provided -> use p-values of 0.99
+      } else if (length(se) > 0 && length(pv) == 0) {
+        #p-values not provided -> use p-values of 0.99
         coef <- cbind(cf, se, rep(0.99, length(cf)))
+      } else if (length(se) == 0 && length(pv) > 0) {
+        coef <- cbind(cf, rep(NA, length(cf)), pv)
+      } else {
+        # not even SEs provided
+        coef <- cbind(cf, rep(NA, length(cf)), rep(0.99, length(cf)))
       }
     }
     rownames(coef) <- models[[i]]@coef.names
@@ -613,10 +621,11 @@ stars.string <- function(pval, stars, star.char, star.prefix, star.suffix,
 
 
 # return the output matrix with coefficients, SEs and significance stars
-outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits, 
-    se.prefix, se.suffix, star.prefix, star.suffix, star.char = "*", 
-    stars, dcolumn = TRUE, symbol, bold, bold.prefix, bold.suffix, 
-    ci = rep(FALSE, length(m) / 3), semicolon = "; ", ci.test = 0) {
+outputmatrix <- function(m, single.row, neginfstring, posinfstring, 
+    leading.zero, digits, se.prefix, se.suffix, star.prefix, star.suffix, 
+    star.char = "*", stars, dcolumn = TRUE, symbol, bold, bold.prefix, 
+    bold.suffix, ci = rep(FALSE, length(m) / 3), semicolon = "; ", 
+    ci.test = 0) {
   
   # write coefficient rows
   if (single.row == TRUE) {
@@ -636,6 +645,8 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
           output.matrix[i, k] <- ""
         } else if (m[i, j] == -Inf) {
           output.matrix[i, k] <- neginfstring
+        } else if (m[i, j] == Inf) {
+          output.matrix[i, k] <- posinfstring
         } else {
           
           # in case of CIs, replace brackets by square brackets
@@ -720,6 +731,9 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
         } else if (m[i, j] == -Inf) {
           output.matrix[(i * 2) - 1, k] <- neginfstring  #upper row
           output.matrix[(i * 2), k] <- ""  #lower se row
+        } else if (m[i, j] == Inf) {
+          output.matrix[(i * 2) - 1, k] <- posinfstring  #upper row
+          output.matrix[(i * 2), k] <- ""  #lower se row
         } else {
           
           # in case of CIs, replace brackets by square brackets
@@ -782,6 +796,17 @@ outputmatrix <- function(m, single.row, neginfstring, leading.zero, digits,
         j <- j + 3
       }
     }
+    
+    # check if SEs are all missing and delete even rows if necessary
+    se.missing <- numeric()
+    for (i in seq(2, nrow(output.matrix), 2)) {
+      if (all(sapply(output.matrix[i, ], function(x) x == ""))) {
+        se.missing <- c(se.missing, i)
+      }
+    }
+    if (length(se.missing) == nrow(output.matrix) / 2) {
+      output.matrix <- output.matrix[-se.missing, ]
+    }
   }
   
   return(output.matrix)
@@ -799,7 +824,7 @@ format.column <- function(x, single.row = FALSE, digits = 2) {
   for (i in 1:length(x)) {
     first.dot <- dots[[i]][1]
     paren <- attributes(parentheses)$match.length[i]
-    if (x[i] == "-Inf") {
+    if (x[i] %in% c("-Inf", "Inf")) {
       first.dot <- nchar(x[i]) - digits
     } else if (first.dot == -1) {
       temp <- nchar(x[i]) + 1
@@ -818,7 +843,7 @@ format.column <- function(x, single.row = FALSE, digits = 2) {
     
     #fill with spaces at the beginning
     first.dot <- dots[[i]][1]
-    if (x[i] == "-Inf") {
+    if (x[i] %in% c("-Inf", "Inf")) {
       first.dot <- nchar(x[i]) - digits
     } else if (first.dot == -1) {
       first.dot <- nchar(x[i]) + 1

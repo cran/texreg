@@ -21,6 +21,8 @@
 \alias{extract,censReg-method}
 \alias{extract.clm}
 \alias{extract,clm-method}
+\alias{extract.clmm}
+\alias{extract,clmm-method}
 \alias{extract.clogit}
 \alias{extract,clogit-method}
 \alias{extract.coeftest}
@@ -51,6 +53,8 @@
 \alias{extract,gee-method}
 \alias{extract.geeglm}
 \alias{extract,geeglm-method}
+\alias{extract.gel}
+\alias{extract,gel-method}
 \alias{extract.glm}
 \alias{extract,glm-method}
 \alias{extract.glmerMod}
@@ -65,6 +69,8 @@
 \alias{extract,gls-method}
 \alias{extract.gmm}
 \alias{extract,gmm-method}
+\alias{extract.H2OBinomialModel}
+\alias{extract,H2OBinomialModel-method}
 \alias{extract.hurdle}
 \alias{extract,hurdle-method}
 \alias{extract.ivreg}
@@ -208,6 +214,11 @@ extract(model, ...)
     include.aic = TRUE, include.bic=TRUE, include.loglik = TRUE, 
     include.nobs = TRUE, ...)
 
+\S4method{extract}{clmm}(model, include.thresholds = TRUE,
+    include.loglik = TRUE, include.aic = TRUE,  
+    include.bic = TRUE, include.nobs = TRUE, 
+    include.groups = TRUE, include.variance = TRUE, ...)
+
 \S4method{extract}{clogit}(model, include.aic = TRUE, 
     include.rsquared = TRUE, include.maxrs = TRUE, 
     include.events = TRUE, include.nobs = TRUE, 
@@ -264,6 +275,10 @@ extract(model, ...)
 \S4method{extract}{geeglm}(model, include.scale = TRUE, 
     include.correlation = TRUE, include.nobs = TRUE, ...)
 
+\S4method{extract}{gel}(model, include.obj.fcn = TRUE, 
+    include.overidentification = FALSE, include.nobs = TRUE, 
+    overIdentTest = c("LR", "LM", "J "), ...)
+
 \S4method{extract}{glm}(model, include.aic = TRUE, 
     include.bic = TRUE, include.loglik = TRUE, 
     include.deviance = TRUE, include.nobs = TRUE, ...)
@@ -294,6 +309,12 @@ extract(model, ...)
 
 \S4method{extract}{gmm}(model, include.obj.fcn = TRUE, 
     include.overidentification = FALSE, include.nobs = TRUE, ...)
+
+\S4method{extract}{H2OBinomialModel}(model, standardized = FALSE, 
+      include.mse = TRUE, include.rsquared = TRUE, 
+      include.logloss = TRUE, include.meanerror = TRUE, 
+      include.auc = TRUE, include.gini = TRUE, 
+      include.deviance = TRUE, include.aic = TRUE, ...)
 
 \S4method{extract}{hurdle}(model, beside = FALSE, 
     include.count = TRUE, include.zero = TRUE, include.aic = TRUE, 
@@ -420,9 +441,8 @@ extract(model, ...)
     include.percentile = TRUE, ...)
 
 \S4method{extract}{sarlm}(model, include.nobs = TRUE, 
-    include.aic = TRUE, include.loglik = TRUE, 
-    include.wald = TRUE, include.lambda = TRUE, 
-    include.rho = TRUE, ...)
+    include.loglik = TRUE, include.aic = TRUE, include.lr = TRUE, 
+    include.wald = TRUE, ...)
 
 \S4method{extract}{sclm}(model, include.thresholds = TRUE, 
     include.aic = TRUE, include.bic = TRUE, include.loglik = TRUE, 
@@ -460,7 +480,8 @@ extract(model, ...)
     include.nobs = TRUE, ...)
 
 \S4method{extract}{systemfit}(model, include.rsquared = TRUE, 
-    include.adjrs = TRUE, include.nobs = TRUE, ...)
+    include.adjrs = TRUE, include.nobs = TRUE, beside = FALSE, 
+    include.suffix = FALSE, ...)
 
 \S4method{extract}{texreg}(model, ...)
 
@@ -531,6 +552,10 @@ An extract method for censReg objects from the \pkg{censReg} package.
 An extract method for clm objects from the \pkg{ordinal} package.
 }
 
+\item{\code{clmm}}{
+An extract method for clmm objects from the \pkg{ordinal} package.
+}
+
 \item{\code{clogit}}{
 An extract method for clogit objects from the \pkg{survival} package.
 }
@@ -591,6 +616,10 @@ An extract method for gee objects from the \pkg{gee} package.
 An extract method for geeglm objects from the \pkg{geepack} package.
 }
 
+\item{\code{gel}}{
+An extract method for gel objects from the \pkg{gmm} package.
+}
+
 \item{\code{glm}}{
 An extract method for glm objects from the \pkg{stats} package.
 }
@@ -619,12 +648,16 @@ An extract method for gls objects from the \pkg{nlme} package.
 An extract method for gmm objects from the \pkg{gmm} package.
 }
 
-\item{\code{ivreg}}{
-An extract method for ivreg objects from the \pkg{AER} package.
+\item{\code{H2OBinomialModel}}{
+An extract method for H2OBinomialModel objects from the \pkg{h2o} package.
 }
 
 \item{\code{hurdle}}{
 An extract method for hurdle objects from the \pkg{pscl} package.
+}
+
+\item{\code{ivreg}}{
+An extract method for ivreg objects from the \pkg{AER} package.
 }
 
 \item{\code{lm}}{
@@ -811,6 +844,7 @@ An extract method for zeroinfl objects from the \pkg{pscl} package.
 \item{include.adjrs}{If available: should the adjusted R-squared be reported? }
 \item{include.aic}{ If available: should Akaike's information criterion (AIC) be reported? }
 \item{include.aicc}{ If available: should AICc be reported? This is a version of AIC with a correction for finite sample sizes. }
+\item{include.auc}{ If available: should the area under the curve (AUC) be reported? }
 \item{include.bic}{ If available: should the Bayesian information criterion (BIC) be reported? }
 \item{include.censnobs}{ If available: should the total, right-censored, left-censored, and uncensored number of observations be reported? }
 \item{include.correlation}{ If available: should the correlation parameter alpha and its standard error be reported (for geeglm models)? }
@@ -826,33 +860,36 @@ An extract method for zeroinfl objects from the \pkg{pscl} package.
 \item{include.formation}{ If available: should the coefficients for the formation phase in a STERGM be reported? }
 \item{include.fstatistic}{ If available: should the F statistic be reported? }
 \item{include.gaic}{ If available: should the Generalized Akaike's information criterion (GAIC) be reported? }
+\item{include.gini}{ If available: should the Gini coefficient be reported? }
 \item{include.gcv}{ If available: should the GCV score be reported (in GAMs)? }
 \item{include.groups}{ If available: should the number of groups in a mixed-effects model (or \code{k} alternatives in a multinomial choice model) be reported? }
 \item{include.intercept}{ If available: should the intercept be included in the GOF block? }
 \item{include.iterations}{ If available: should the number of iterations be included? }
-\item{include.lambda}{ If available: should the lambda statistic and p-value be reported? }
 \item{include.loglik}{ If available: should the log-likelihood be reported? }
+\item{include.logloss}{If available: should the log loss be reported? }
 \item{include.lr}{ If available: should the likelihood ratio test be reported? }
 \item{include.maxrs}{If available: should the maximum possible R-squared be reported? }
+\item{include.meanerror}{If available: should the mean per-class error be reported? }
 \item{include.missings}{ If available: should the number of missing observations be reported (in survival models)? }
+\item{include.mse}{If available: should the mean square error be reported? }
 \item{include.nagelkerke}{ If available: should Nagelkerke's R-squared be reported? }
 \item{include.nobs}{ If available: should the number of observations be reported? }
 \item{include.nsmooth}{ If available: should the number of smooth terms be reported (in GAMs)? }
 \item{include.nvertices}{ If available: should the number of vertices be reported in a statistical network model? }
-\item{include.obj.fcn}{ If available: should the value of the objective function (= criterion function) be reported (for \code{gmm} objects)? More precisely, this returns \code{E(g)var(g)^{-1}E(g)}. }
+\item{include.obj.fcn}{ If available: should the value of the objective function (= criterion function) be reported (for \code{gel} and \code{gmm} objects)? More precisely, this returns \code{E(g)var(g)^{-1}E(g)}. }
 \item{include.outcome}{ If available: should the outcome component of a sample selection model be reported? }
-\item{include.overidentification}{ If available: should the J-test for overidentification be reported (for \code{gmm} objects)? }
+\item{include.overidentification}{ If available: should the J-test for overidentification be reported (for \code{gel} and \code{gmm} objects)? }
 \item{include.percentile}{ If available: should the percentile (tau) be reported? }
 \item{include.precision}{ If available: should the precision estimates of a betareg fit (the phi coefficients) be reported as part of the coefficients block? }
 \item{include.pseudors}{ If available: should the pseudo R-squared be reported? }
 \item{include.pvalues}{ If available: should the p values be reported (naive p values are not recommended for lme4 models, but see also the \code{mcmc.pvalues} argument)? }
-\item{include.rho}{ If available: should the lambda statistic and p-value be reported? }
 \item{include.rmse}{ If available: should the root-mean-square error (= residual standard deviation) be reported? }
 \item{include.rsquared}{ If available: should R-squared be reported? }
 \item{include.sargan}{ If available: should the Sargan test be reported? }
 \item{include.scale}{ If available: should the scale parameter gamma and its standard error be reported (for geeglm models)? }
 \item{include.selection}{ If available: should the selection component of a sample selection model be reported? }
 \item{include.smooth}{ If available: should the smooth terms of a GAM be reported? If they are reported, the EDF value is reported as the coefficient, and DF is included in parentheses (not standard errors because a chi-square test is used for the smooth terms). }
+\item{include.suffix}{ If available: include the name of the current model in parentheses after each model term (instead of before the model term). }
 \item{include.tau}{ If available: include tau in linear quantile mixed models? }
 \item{include.thresholds}{ If available: should the threshold parameters (that is, the intercepts for the class boundaries) be reported in ordinal models? }
 \item{include.trisk}{ If available: should the total time at risk be reported (in event-history models)? }
@@ -866,8 +903,10 @@ An extract method for zeroinfl objects from the \pkg{pscl} package.
 \item{levels}{ The names of the levels of a multinomial model that should be included in the table. Should be provided as a vector of character strings. }
 \item{method}{ The method used to compute confidence intervals or p values. In \pkg{lme4} models, the default value \code{"naive"} computes naive p values while the other methods compute confidence intervals using the \code{confint} function. }
 \item{nsim}{ In linear mixed effects models: the MCMC sample size or number of bootstrapping replications on the basis of which confidence intervals are computed (only if the \code{method} argument does not specify \code{"naive"}, which is the default behavior). Note: large values may take considerable computing time. }
+\item{overIdentTest}{ If available: which test statistics should be included in an overidentification test (for \code{gel} and \code{gmm} objects)? }
 \item{prefix}{ Include prefix before the label of the coefficient in order to identify the current model component. }
 \item{robust}{ If available: report robust instead of naive standard errors. }
+\item{standardized}{ If available: report standardized coefficients instead of raw coefficients? }
 \item{use.ci}{ Use confidence intervals rather than standard errors. }
 \item{...}{ Custom parameters which are handed over to subroutines. }
 }
