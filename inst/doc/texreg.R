@@ -1,13 +1,13 @@
 ### R code from vignette source 'texreg.Rnw'
 
 ###################################################
-### code chunk number 1: texreg.Rnw:782-783
+### code chunk number 1: texreg.Rnw:796-797
 ###################################################
 options(prompt="R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 
 ###################################################
-### code chunk number 2: texreg.Rnw:790-796
+### code chunk number 2: texreg.Rnw:804-810
 ###################################################
 ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
 trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
@@ -18,27 +18,27 @@ m2 <- lm(weight ~ group - 1)
 
 
 ###################################################
-### code chunk number 3: texreg.Rnw:800-801
+### code chunk number 3: texreg.Rnw:814-815
 ###################################################
 summary(m2)
 
 
 ###################################################
-### code chunk number 4: texreg.Rnw:806-808 (eval = FALSE)
+### code chunk number 4: texreg.Rnw:820-822 (eval = FALSE)
 ###################################################
 ## library("texreg")
 ## screenreg(list(m1, m2))
 
 
 ###################################################
-### code chunk number 5: texreg.Rnw:812-814
+### code chunk number 5: texreg.Rnw:826-828
 ###################################################
 library("texreg")
 screenreg(list(m1, m2))
 
 
 ###################################################
-### code chunk number 6: texreg.Rnw:831-834
+### code chunk number 6: texreg.Rnw:845-848
 ###################################################
 texreg(list(m1, m2), dcolumn = TRUE, booktabs = TRUE,
     use.packages = FALSE, label = "tab:3", caption = "Two linear models.",
@@ -46,7 +46,7 @@ texreg(list(m1, m2), dcolumn = TRUE, booktabs = TRUE,
 
 
 ###################################################
-### code chunk number 7: texreg.Rnw:865-870
+### code chunk number 7: texreg.Rnw:879-884
 ###################################################
 mytable <- texreg(list(m1, m2), label = "tab:4", 
     caption = "Bolded coefficients, custom notes, three digits.", 
@@ -56,7 +56,7 @@ mytable <- texreg(list(m1, m2), label = "tab:4",
 
 
 ###################################################
-### code chunk number 8: texreg.Rnw:872-877
+### code chunk number 8: texreg.Rnw:886-891
 ###################################################
 texreg(list(m1, m2), label = "tab:4", 
     caption = "Bolded coefficients, custom notes, three digits.", 
@@ -66,7 +66,7 @@ texreg(list(m1, m2), label = "tab:4",
 
 
 ###################################################
-### code chunk number 9: texreg.Rnw:912-936
+### code chunk number 9: texreg.Rnw:926-950
 ###################################################
 library("nlme")
 m3 <- gls(follicles ~ sin(2 * pi * Time) + cos(2 * pi * Time), Ovary,
@@ -95,7 +95,7 @@ texreg(
 
 
 ###################################################
-### code chunk number 10: texreg.Rnw:989-996 (eval = FALSE)
+### code chunk number 10: texreg.Rnw:1003-1010 (eval = FALSE)
 ###################################################
 ## library("sandwich")
 ## library("lmtest")
@@ -107,21 +107,21 @@ texreg(
 
 
 ###################################################
-### code chunk number 11: texreg.Rnw:1017-1019
+### code chunk number 11: texreg.Rnw:1031-1033
 ###################################################
 htmlreg(list(m1, m2, m3), file = "mytable.doc", inline.css = FALSE, 
     doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE)
 
 
 ###################################################
-### code chunk number 12: texreg.Rnw:1041-1043
+### code chunk number 12: texreg.Rnw:1055-1057
 ###################################################
 htmlreg(list(m1, m2, m3), star.symbol = "\\*", center = TRUE, 
     doctype = FALSE)
 
 
 ###################################################
-### code chunk number 13: texreg.Rnw:1069-1073
+### code chunk number 13: texreg.Rnw:1083-1087
 ###################################################
 texreg(list(m1, m1, m2), ci.force = c(FALSE, TRUE, TRUE), ci.test = 0,
     ci.force.level = 0.95, bold = 0.05, float.pos = "tb",
@@ -136,7 +136,7 @@ plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
 
 
 ###################################################
-### code chunk number 15: texreg.Rnw:1145-1169 (eval = FALSE)
+### code chunk number 15: texreg.Rnw:1159-1183 (eval = FALSE)
 ###################################################
 ## extract.lm <- function(model) {
 ##   s <- summary(model)
@@ -165,21 +165,21 @@ plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
 
 
 ###################################################
-### code chunk number 16: texreg.Rnw:1193-1195 (eval = FALSE)
+### code chunk number 16: texreg.Rnw:1207-1209 (eval = FALSE)
 ###################################################
 ## setMethod("extract", signature = className("lm", "stats"), 
 ##     definition = extract.lm)
 
 
 ###################################################
-### code chunk number 17: texreg.Rnw:1202-1204 (eval = FALSE)
+### code chunk number 17: texreg.Rnw:1216-1218 (eval = FALSE)
 ###################################################
 ## setMethod("extract", signature = className("clogit", "survival"), 
 ##     definition = extract.clogit)
 
 
 ###################################################
-### code chunk number 18: texreg.Rnw:1213-1258 (eval = FALSE)
+### code chunk number 18: texreg.Rnw:1227-1272 (eval = FALSE)
 ###################################################
 ## extract.lm <- function(model, include.rsquared = TRUE, 
 ##     include.adjrs = TRUE, include.nobs = TRUE, ...) {
@@ -229,37 +229,37 @@ plotreg(m1, custom.coef.names = c("Intercept", "Group Trt"))
 
 
 ###################################################
-### code chunk number 19: texreg.Rnw:1282-1283 (eval = FALSE)
+### code chunk number 19: texreg.Rnw:1296-1297 (eval = FALSE)
 ###################################################
 ## install.packages("texreg")
 
 
 ###################################################
-### code chunk number 20: texreg.Rnw:1286-1287 (eval = FALSE)
+### code chunk number 20: texreg.Rnw:1300-1301 (eval = FALSE)
 ###################################################
 ## install.packages("texreg", repos = "http://R-Forge.R-project.org")
 
 
 ###################################################
-### code chunk number 21: texreg.Rnw:1290-1291 (eval = FALSE)
+### code chunk number 21: texreg.Rnw:1304-1305 (eval = FALSE)
 ###################################################
 ## update.packages("texreg", repos = "http://R-Forge.R-project.org")
 
 
 ###################################################
-### code chunk number 22: texreg.Rnw:1301-1302 (eval = FALSE)
+### code chunk number 22: texreg.Rnw:1315-1316 (eval = FALSE)
 ###################################################
 ## help(package = "texreg")
 
 
 ###################################################
-### code chunk number 23: texreg.Rnw:1305-1306 (eval = FALSE)
+### code chunk number 23: texreg.Rnw:1319-1320 (eval = FALSE)
 ###################################################
 ## help("texreg")
 
 
 ###################################################
-### code chunk number 24: texreg.Rnw:1309-1311 (eval = FALSE)
+### code chunk number 24: texreg.Rnw:1323-1325 (eval = FALSE)
 ###################################################
 ## help("extract")
 ## help("extract-methods")
