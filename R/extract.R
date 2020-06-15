@@ -739,8 +739,8 @@ extract.brmsfit <- function (model,
 #' @param include.loo.ic Report Leave-One-Out Information Criterion?
 #' @param reloo Recompute exact cross-validation for problematic observations
 #'   for which approximate leave-one-out cross-validation may return incorrect
-#'   results? This is done using the \code{\link[brms]{reloo}} function and may
-#'   take some time to compute.
+#'   results? This is done using the \code{\link[brms]{reloo.brmsfit}} function
+#'   and may take some time to compute.
 #' @param include.waic Report Widely Applicable Information Criterion (WAIC)?
 #' @param ... Custom parameters, which are handed over to subroutines, in this
 #'   case to the \code{summary} method for the object.
@@ -1964,7 +1964,7 @@ extract.forecast <- function (model, ...) {
 #' \code{\link{extract}} method for \code{forecast} objects
 #'
 #' \code{\link{extract}} method for \code{forecast} objects created by the
-#' \code{\link[forecast]{forecast}} and \code{\link[forecast]{holt}} functions
+#' \code{\link[forecast]{forecast}} and \code{\link[forecast:ses]{holt}} functions
 #' in the \pkg{forecast} package.
 #'
 #' @param model A statistical model object.
@@ -2767,7 +2767,7 @@ extract.glm.cluster <- function (model,
 #' \code{\link{extract}} method for \code{glm.cluster} objects
 #'
 #' \code{\link{extract}} method for \code{glm.cluster} objects created by the
-#' \code{\link[miceadds]{glm.cluster}} function in the \pkg{miceadds} package.
+#' \code{\link[miceadds:lm.cluster]{glm.cluster}} function in the \pkg{miceadds} package.
 #'
 #' @param model A statistical model object.
 #' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
@@ -4802,7 +4802,7 @@ setMethod("extract", signature = className("maBina", "erer"),
           definition = extract.maBina)
 
 
-# -- extract.mhurdle (mhurdle) -----------------------------------------------------
+# -- extract.mhurdle (mhurdle) -------------------------------------------------
 
 #' @noRd
 extract.mhurdle <- function (model,
@@ -4915,14 +4915,24 @@ extract.mlogit <- function(model,
     gof.decimal <- c(gof.decimal, c(FALSE, TRUE))
   }
 
+  # check for choice-specific covariates and fix beside argument if necessary
+  models <- attributes(model$freq)$dimnames[[1]][-1]
+  rows <- which(grepl(paste0(":", models[1], "$"), rn))
+  if (isTRUE(beside) &&
+      (ncol(s$residuals) - 1) * length(rows) < nrow(s$CoefTable)) {
+    beside <- FALSE
+    warning(paste0("The mlogit model has choice-specific covariates; 'beside'",
+                   " argument will be set to FALSE."))
+  }
+
   if (isTRUE(beside)) {
     models <- attributes(model$freq)$dimnames[[1]][-1]
     trlist <- list()
     for (i in 1:length(models)) {
-      rows <- which(grepl(paste0("^", models[i]), rn))
+      rows <- which(grepl(paste0(":", models[i], "$"), rn))
       coeftable <- s$CoefTable[rows, ]
       cn <- rn[rows]
-      cn <- gsub(paste0("^", models[i], ":"), "", cn)
+      cn <- gsub(paste0(":", models[i], "$"), "", cn)
       co <- coeftable[, 1]
       se <- coeftable[, 2]
       pval <- coeftable[, 4]
@@ -5030,6 +5040,15 @@ extract.mnlogit <- function(model,
     gof.names <- c(gof.names, "Iterations", "Gradient 2-norm",
                    "Diff. Likelihood")
     gof.decimal <- c(gof.decimal, c(FALSE, TRUE, TRUE))
+  }
+
+  # check for choice-specific covariates and fix beside argument if necessary
+  models <- attributes(model$freq)$names[-1]
+  rows <- which(grepl(paste0(models[1], "$"), coefnames))
+  if (isTRUE(beside) && (ncol(s$residuals) - 1) * length(rows) < nrow(coT)) {
+    beside <- FALSE
+    warning(paste0("The mnlogit model has choice-specific covariates; 'beside'",
+                   " argument will be set to FALSE."))
   }
 
   if (beside == FALSE) {
@@ -5618,7 +5637,7 @@ extract.mtergm <- function(model, include.nobs = TRUE, include.aic = TRUE,
 #' \code{\link{extract}} method for \code{mtergm} objects
 #'
 #' \code{\link{extract}} method for \code{mtergm} objects created by the
-#' \code{\link[btergm]{mtergm}} function in the \pkg{btergm} package.
+#' \code{\link[btergm:btergm]{mtergm}} function in the \pkg{btergm} package.
 #'
 #' @param model A statistical model object.
 #' @param include.nobs Report the number of observations in the GOF block?
@@ -6593,7 +6612,7 @@ setMethod("extract", signature = className("rq", "quantreg"),
           definition = extract.rq)
 
 
-# -- extract.sarlm (spdep) -----------------------------------------------------
+# -- extract.sarlm (spatialreg) ------------------------------------------------
 
 #' @noRd
 extract.sarlm <- function(model,
@@ -6699,7 +6718,8 @@ extract.sarlm <- function(model,
 #' \code{\link{extract}} method for \code{sarlm} objects
 #'
 #' \code{\link{extract}} method for \code{sarlm} objects created by the
-#' \code{\link[spdep]{lagsarlm}} function in the \pkg{spdep} package.
+#' \code{\link[spatialreg:ML_models]{lagsarlm}} function in the \pkg{spatialreg}
+#' package.
 #'
 #' @param model A statistical model object.
 #' @param include.nobs Report the number of observations in the GOF block?

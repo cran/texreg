@@ -783,7 +783,7 @@ knitreg <- function(...) {
 #' @param digits Set the number of decimal places for coefficients, standard
 #'   errors and goodness-of-fit statistics. Do not use negative values! The
 #'   argument works like the \code{digits} argument in the
-#'   \code{\link[base]{round}} function of the \pkg{base} package.
+#'   \code{\link[base:Round]{round}} function of the \pkg{base} package.
 #' @param leading.zero Most journals require leading zeros of coefficients and
 #'   standard errors (for example, \code{0.35}). This is also the default texreg
 #'   behavior. Some journals, however, require omission of leading zeros (for
@@ -893,7 +893,7 @@ knitreg <- function(...) {
 #'   for each model separately whether the model should be forced to report
 #'   confidence intervals (e.g., \code{ci.force = c(FALSE, TRUE, FALSE)}).
 #'   Confidence intervals are computed using the standard normal distribution
-#'   (z-values based on the \code{\link[stats]{qnorm}} function). The
+#'   (z-values based on the \code{\link[stats:Normal]{qnorm}} function). The
 #'   t-distribution is currently not supported because this would require each
 #'   \code{\link{extract}} method to have an additional argument for the degrees
 #'   of freedom.
@@ -982,7 +982,7 @@ knitreg <- function(...) {
 #' @seealso \code{\link{texreg-package}} \code{\link{extract}}
 #'   \code{\link{texreg}}
 #'
-#' @importFrom stats qnorm
+#' @import stats
 #' @export
 matrixreg <- function(l,
                       single.row = FALSE,
@@ -2095,7 +2095,7 @@ print.texregTable <- function(x, ...) {
 #' @param theme The \code{theme} argument can be used to customize the
 #'   appearance of the plot. The default theme is \code{theme_bw}. It can be
 #'   replaced by any other \pkg{ggplot2} theme. See
-#'   \code{\link[ggplot2]{theme_bw}} for details.
+#'   \code{\link[ggplot2]{ggtheme}} for details.
 #' @param signif.light Color of outer confidence intervals for significant model
 #'   terms.
 #' @param signif.medium Color of inner confidence intervals for significant
@@ -2142,7 +2142,7 @@ print.texregTable <- function(x, ...) {
 #' plotreg(list(lm.D9, lm.D90), type = "forest")
 #' }
 #'
-#' @importFrom stats qnorm
+#' @import stats
 #' @export
 plotreg <- function(l,
                     file = NULL,
@@ -3771,6 +3771,7 @@ wordreg <- function(l,
     "Version:  ", desc$Version, "\n",
     "Date:     ", desc$Date, "\n",
     "Author:   ", "Philip Leifeld (University of Essex)", "\n\n",
+    "Consider submitting praise using the praise or praise_interactive functions.\n",
     "Please cite the JSS article in your publications -- see citation(\"texreg\")."
   )
 }

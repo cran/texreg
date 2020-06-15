@@ -1,6 +1,6 @@
 Package: texreg
-Version: 1.37.2
-Date: 2020-05-29
+Version: 1.37.4
+Date: 2020-06-14
 Title: Conversion of R Regression Output to LaTeX or HTML Tables
 Authors@R: c(person(given = "Philip", family = "Leifeld", email = "philip.leifeld@essex.ac.uk", role = c("aut", "cre")),
              person(given = "Claudia", family = "Zucca", email = "claudia.zucca@glasgow.ac.uk", role = "ctb"))
@@ -8,30 +8,24 @@ Description: Converts coefficients, standard errors, significance stars, and goo
 URL: http://github.com/leifeld/texreg/
 BugReports: https://github.com/leifeld/texreg/issues
 Suggests: broom (>= 0.4.2), coda (>= 0.19.2), ggplot2 (>= 3.1.0),
-        huxtable (>= 4.2.0), knitr (>= 1.22), rmarkdown (>= 1.12),
-        sandwich (>= 2.3-1), testthat (>= 2.0.0), lmtest (>= 0.9-34),
-        carData (>= 3.0-2)
+        huxtable (>= 4.2.0), knitr (>= 1.22), rmarkdown (>= 1.12.3),
+        sandwich (>= 2.3-1), testthat (>= 2.0.0), lmtest (>= 0.9-34)
 Depends: R (>= 3.5)
 Imports: methods, stats, httr
-Enhances: AER, alpaca, betareg, bife, biglm, brglm, brms (>= 2.8.8),
-        btergm, censReg, dynlm, eha, erer, ergm, feisr (>= 1.0.1),
-        fGarch, forecast, gamlss, gamlss.inf, gee, geepack, glmmADMB,
-        glmmTMB, gmm, gnm, h2o, latentnet, lfe, lme4, lqmm, MASS,
-        metaSEM, mfx, mgcv, mhurdle, miceadds, mlogit, mnlogit, MuMIn,
-        nlme, nnet, oglmx, ordinal, panelAR, pglm, pgmm, plm, pscl,
-        quantreg, relevent, rms, robust, robustbase, RSiena,
-        sampleSelection, simex, sna, spdep, speedglm, survey, survival,
-        systemfit, tergm, VGAM, Zelig
-Additional_repositories: http://r-forge.r-project.org/
-SystemRequirements: LaTeX packages tikz, booktabs, dcolumn, rotating,
+Enhances: AER, alpaca, bife, biglm, brms (>= 2.8.8), btergm, dynlm,
+        feisr (>= 1.0.1), forecast, gamlss, gamlss.inf, glmmTMB, lfe,
+        lme4, miceadds, mlogit, mnlogit, MuMIn, nlme, nnet, plm,
+        speedglm, survival, VGAM, Zelig
+SystemRequirements: pandoc (>= 1.12.3) suggested for using wordreg
+        function; LaTeX packages tikz, booktabs, dcolumn, rotating,
         thumbpdf, longtable, paralist for the vignette
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.1.0
 NeedsCompilation: no
-Packaged: 2020-05-29 20:31:51 UTC; philip
+Packaged: 2020-06-14 22:05:39 UTC; philip
 Author: Philip Leifeld [aut, cre],
   Claudia Zucca [ctb]
 Maintainer: Philip Leifeld <philip.leifeld@essex.ac.uk>
 Repository: CRAN
-Date/Publication: 2020-06-13 15:50:02 UTC
+Date/Publication: 2020-06-15 12:50:02 UTC

@@ -174,7 +174,7 @@ affected because they only insert columns into the coefficient block.}
 \item{digits}{Set the number of decimal places for coefficients, standard
 errors and goodness-of-fit statistics. Do not use negative values! The
 argument works like the \code{digits} argument in the
-\code{\link[base]{round}} function of the \pkg{base} package.}
+\code{\link[base:Round]{round}} function of the \pkg{base} package.}
 
 \item{leading.zero}{Most journals require leading zeros of coefficients and
 standard errors (for example, \code{0.35}). This is also the default texreg
@@ -296,7 +296,7 @@ report confidence intervals (\code{ci.force = TRUE} for all and
 for each model separately whether the model should be forced to report
 confidence intervals (e.g., \code{ci.force = c(FALSE, TRUE, FALSE)}).
 Confidence intervals are computed using the standard normal distribution
-(z-values based on the \code{\link[stats]{qnorm}} function). The
+(z-values based on the \code{\link[stats:Normal]{qnorm}} function). The
 t-distribution is currently not supported because this would require each
 \code{\link{extract}} method to have an additional argument for the degrees
 of freedom.}
