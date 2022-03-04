@@ -25,7 +25,8 @@
 #' for linear models. To get help on a specific extract method, type something
 #' like \code{?`extract,lm-method`} (or something similar for other models,
 #' where \code{"lm"} needs to be replaced by the class name of the respective
-#' model).
+#' model). You can also list the available methods by displaying the
+#' \link[=texreg-package]{texreg package} help index.
 #'
 #' Users can contribute their own extensions for additional statistical models.
 #' Examples are contained in the article in the Journal of Statistical Software
@@ -45,7 +46,7 @@
 #'
 #' @references Leifeld, Philip (2013). texreg: Conversion of Statistical Model
 #'   Output in R to LaTeX and HTML Tables. Journal of Statistical Software
-#'   55(8): 1-24. \url{http://www.jstatsoft.org/v55/i08/}.
+#'   55(8): 1-24. \doi{10.18637/jss.v055.i08}.
 #'
 #' @export
 setGeneric("extract", function(model, ...) standardGeneric("extract"),
@@ -300,6 +301,45 @@ extract.averaging <- function(model, use.ci = FALSE, adjusted.se = FALSE,
 #' @export
 setMethod("extract", signature = className("averaging", "MuMIn"),
           definition = extract.averaging)
+
+
+# -- extract.bergm (Bergm) -----------------------------------------------------
+
+#' @noRd
+extract.bergm <- function(model, posterior.median = FALSE, level = 0.95, ...) {
+  coefnames <- model$specs
+  coefs <- apply(model$Theta, 2, ifelse(isTRUE(posterior.median), median, mean))
+  alpha <- (1 - level) / 2
+  cil <- apply(model$Theta, 2, function(x) quantile(x, (1 - level) / 2))
+  ciu <- apply(model$Theta, 2, function(x) quantile(x, 1 - ((1 - level) / 2)))
+
+  tr <- createTexreg(
+    coef.names = coefnames,
+    coef = coefs,
+    ci.low = cil,
+    ci.up = ciu
+  )
+  return(tr)
+}
+
+#' \code{\link{extract}} method for \code{bergm} objects
+#'
+#' \code{\link{extract}} method for \code{bergm} objects created by the
+#' \code{\link[Bergm]{bergm}} function in the \pkg{Bergm} package.
+#'
+#' @param model A statistical model object.
+#' @param posterior.median Report the posterior median instead of the default
+#'   posterior mean as coefficients?
+#' @param level Confidence level, i.e., the proportion of the posterior
+#'   distribution to be included in the credible interval.
+#' @param ... Custom parameters, which are handed over to subroutines. Currently
+#'   not in use.
+#'
+#' @method extract bergm
+#' @aliases extract.bergm
+#' @export
+setMethod("extract", signature = className("bergm", "Bergm"),
+          definition = extract.bergm)
 
 
 # -- extract.betamfx (mfx) -----------------------------------------------------
@@ -1440,11 +1480,11 @@ setMethod("extract", signature = className("coxph.penal", "survival"),
 extract.ergm <- function(model, include.aic = TRUE, include.bic = TRUE,
                          include.loglik = TRUE, ...) {
   s <- summary(model, ...)
-
-  coefficient.names <- rownames(s$coefs)
-  coefficients <- s$coefs[, 1]
-  standard.errors <- s$coefs[, 2]
-  significance <- s$coefs[, 4]
+  coefs <- coef(s)
+  coefficient.names <- rownames(coefs)
+  coefficients <- coefs[, 1]
+  standard.errors <- coefs[, 2]
+  significance <- coefs[, 5]
 
   gof <- numeric()
   gof.names <- character()
@@ -1875,6 +1915,7 @@ extract.felm <- function(model,
                          include.rsquared = TRUE,
                          include.adjrs = TRUE,
                          include.fstatistic = FALSE,
+                         include.proj.stats = TRUE,
                          include.groups = TRUE,
                          ...) {
 
@@ -1893,23 +1934,39 @@ extract.felm <- function(model,
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.rsquared == TRUE) {
-    gof <- c(gof, s$r2, s$P.r.squared)
-    gof.names <- c(gof.names, "R$^2$ (full model)", "R$^2$ (proj model)")
-    gof.decimal <- c(gof.decimal, TRUE, TRUE)
+    gof <- c(gof, s$r2)
+    gof.decimal <- c(gof.decimal, TRUE)
+    if (include.proj.stats == TRUE) {
+      gof <- c(gof, s$P.r.squared)
+      gof.decimal <- c(gof.decimal, TRUE)
+      gof.names <- c(gof.names, "R$^2$ (full model)", "R$^2$ (proj model)")
+    } else {
+      gof.names <- c(gof.names, "R$^2$")
+    }
   }
   if (include.adjrs == TRUE) {
-    gof <- c(gof, s$r2adj, s$P.adj.r.squared)
-    gof.names <- c(gof.names, "Adj. R$^2$ (full model)",
-                   "Adj. R$^2$ (proj model)")
-    gof.decimal <- c(gof.decimal, TRUE, TRUE)
+    gof <- c(gof, s$r2adj)
+    gof.decimal <- c(gof.decimal, TRUE)
+    if (include.proj.stats == TRUE) {
+      gof <- c(gof, s$P.adj.r.squared)
+      gof.decimal <- c(gof.decimal, TRUE)
+      gof.names <- c(gof.names, "Adj. R$^2$ (full model)", "Adj. R$^2$ (proj model)")
+    } else {
+      gof.names <- c(gof.names, "Adj. R$^2$")
+    }
   }
   if (include.fstatistic == TRUE) {
-    gof <- c(gof, s$F.fstat[1], s$F.fstat[4],
-             s$P.fstat[length(s$P.fstat) - 1], s$P.fstat[1])
-    gof.names <- c(gof.names, "F statistic (full model)",
-                   "F (full model): p-value", "F statistic (proj model)",
-                   "F (proj model): p-value")
-    gof.decimal <- c(gof.decimal, TRUE, TRUE, TRUE, TRUE)
+    gof <- c(gof, s$F.fstat[1], s$F.fstat[4])
+    gof.decimal <- c(gof.decimal, TRUE, TRUE)
+    if (include.proj.stats == TRUE) {
+      gof <- c(gof, s$P.fstat[length(s$P.fstat) - 1], s$P.fstat[1])
+      gof.decimal <- c(gof.decimal, TRUE, TRUE)
+      gof.names <- c(gof.names, "F statistic (full model)",
+                     "F (full model): p-value", "F statistic (proj model)",
+                     "F (proj model): p-value")
+    } else {
+      gof.names <- c(gof.names, "F statistic", "F p-value")
+    }
   }
   if (include.groups == TRUE && length(s$fe) > 0) {
     grp <- sapply(s$fe, function(x) length(levels(x)))
@@ -1941,6 +1998,7 @@ extract.felm <- function(model,
 #' @param include.rsquared Report R^2 in the GOF block?
 #' @param include.adjrs Report adjusted R^2 in the GOF block?
 #' @param include.fstatistic Report the F-statistic in the GOF block?
+#' @param include.proj.stats Include statistics for projected model in the GOF block?
 #' @param include.groups Report the number of groups?
 #' @param ... Custom parameters, which are handed over to subroutines, in this
 #'   case to the \code{summary} method for the object.
@@ -2043,6 +2101,125 @@ extract.feglm <- function(model, include.deviance = TRUE, include.nobs = TRUE,
 #' @export
 setMethod("extract", signature = className("feglm", "alpaca"),
           definition = extract.feglm)
+
+
+# -- extract.fixest (fixest) ---------------------------------------------------
+
+#' @noRd
+extract.fixest <- function(model,
+                           include.nobs = TRUE,       # both
+                           include.groups = TRUE,     # both
+                           include.rsquared = TRUE,   # OLS only
+                           include.adjrs = TRUE,      # OLS only
+                           include.proj.stats = TRUE, # OLS only
+                           include.deviance = TRUE,   # GLM/MLE only
+                           include.loglik = TRUE,     # GLM/MLE only
+                           include.pseudors = TRUE,   # GLM/MLE only
+                           ...) {
+  # coefficient block
+  s <- fixest::coeftable(model, ...)
+  nam <- rownames(s)
+  co <- s[, 1]
+  se <- s[, 2]
+  pval <- s[, 4]
+
+  # GOF block: shared OLS and GLM/MLE statistics
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (isTRUE(include.nobs)) {
+    gof <- c(gof, model$nobs)
+    gof.names <- c(gof.names, "Num. obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (isTRUE(include.groups) && any(model$fixef_sizes > 0)) {
+    grp <- model$fixef_sizes
+    grp.names <- paste0("Num. groups: ", names(grp))
+    gof <- c(gof, grp)
+    gof.names <- c(gof.names, grp.names)
+    gof.decimal <- c(gof.decimal, rep(FALSE, length(grp)))
+  }
+
+  # GOF block: OLS-specific statistics
+  if (model$method == "feols" && isTRUE(include.rsquared)) {
+    gof <- c(gof, fixest::r2(model, "r2"))
+    gof.decimal <- c(gof.decimal, TRUE)
+    if (isTRUE(include.proj.stats)) {
+      gof <- c(gof, fixest::r2(model, "wr2"))
+      gof.decimal <- c(gof.decimal, TRUE)
+      gof.names <- c(gof.names, "R$^2$ (full model)", "R$^2$ (proj model)")
+    } else {
+      gof.names <- c(gof.names, "R$^2$")
+    }
+  }
+  if (model$method == "feols" && isTRUE(include.adjrs)) {
+    gof <- c(gof, fixest::r2(model, "ar2"))
+    gof.decimal <- c(gof.decimal, TRUE)
+    if (isTRUE(include.proj.stats)) {
+      gof <- c(gof, fixest::r2(model, "war2"))
+      gof.decimal <- c(gof.decimal, TRUE)
+      gof.names <- c(gof.names,
+                     "Adj. R$^2$ (full model)",
+                     "Adj. R$^2$ (proj model)")
+    } else {
+      gof.names <- c(gof.names, "Adj. R$^2$")
+    }
+  }
+
+  # GOF block: GLM/MLE-specific statistics
+  if (model$method != "feols" && isTRUE(include.deviance)) {
+    gof <- c(gof, model$deviance)
+    gof.names <- c(gof.names, "Deviance")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (model$method != "feols" && isTRUE(include.loglik)) {
+    gof <- c(gof, model$loglik)
+    gof.names <- c(gof.names, "Log Likelihood")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (model$method != "feols" && isTRUE(include.pseudors)) {
+    gof <- c(gof, model$pseudo_r2)
+    gof.names <- c(gof.names, "Pseudo R$^2$")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+
+  tr <- createTexreg(
+    coef.names = nam,
+    coef = co,
+    se = se,
+    pvalues = pval,
+    gof.names = gof.names,
+    gof = gof,
+    gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+#' \code{\link{extract}} method for \code{fixest} objects
+#'
+#' \code{\link{extract}} method for \code{fixest} objects created by the
+#' model fitting functions in the \pkg{fixest} package. The method can deal with
+#' OLS (fitted by \code{\link[fixest]{feols}}) and GLM/MLE models (fitted by
+#' \code{\link[fixest]{feglm}} and other functions).
+#'
+#' @param model A statistical model object.
+#' @param include.nobs Report the number of observations?
+#' @param include.groups Report the number of groups?
+#' @param include.rsquared Report R^2? (OLS only)
+#' @param include.adjrs Report adjusted R^2? (OLS only)
+#' @param include.proj.stats Include statistics for projected model? (OLS only)
+#' @param include.deviance Report the deviance? (GLM/MLE only)
+#' @param include.loglik Report the log likelihood? (GLM/MLE only)
+#' @param include.pseudors Report Pseudo-R^2? (GLM/MLE only)
+#' @param ... Custom parameters, which are handed over to the
+#'  \code{\link[fixest]{coeftable}} method for the \code{fixest} object.
+#'
+#' @method extract fixest
+#' @aliases extract.fixest
+#' @author Christopher Poliquin, Philip Leifeld
+#' @export
+setMethod("extract", signature = className("fixest", "fixest"),
+          definition = extract.fixest)
 
 
 # -- extract.gam (mgcv) --------------------------------------------------------
@@ -5929,71 +6106,72 @@ setMethod("extract", signature = className("ols", "rms"),
           definition = extract.ols)
 
 
-# -- extract.panelAR (panelAR) -------------------------------------------------
+# -- extract.pcce (plm) --------------------------------------------------------
 
 #' @noRd
-extract.panelAR <- function(model,
-                            include.rsquared = TRUE,
-                            include.nobs = TRUE,
-                            include.groups = TRUE,
-                            ...) {
-  s <- summary(model, ...)
+extract.pcce <- function(model,
+                         include.r.squared = TRUE,
+                         include.sumsquares = TRUE,
+                         include.nobs = TRUE,
+                         ...) {
 
-  coefficient.names <- rownames(s$coef)
-  co <- s$coef[, 1]
-  se <- s$coef[, 2]
-  pval <- s$coef[, 4]
+  s <- summary(model, ...)
+  coefnames <- rownames(s$CoefTable)
+  co <- s$CoefTable[, 1]
+  se <- s$CoefTable[, 2]
+  pval <- s$CoefTable[, 4]
 
   gof <- numeric()
   gof.names <- character()
   gof.decimal <- logical()
-
-  if (include.rsquared == TRUE){
-    rs <- s$r2
+  if (isTRUE(include.r.squared)) {
+    rs <- s$r.squared
     gof <- c(gof, rs)
-    gof.names <- c(gof.names, "R$^2$")
+    gof.names <- c(gof.names, "HPY R$^2$")
     gof.decimal <- c(gof.decimal, TRUE)
   }
-  if (include.nobs == TRUE){
-    nobs <- length(s$residuals)
-    gof <- c(gof, nobs)
+  if (isTRUE(include.sumsquares)) {
+    gof <- c(gof, s$ssr, s$tss)
+    gof.names <- c(gof.names, "RSS", "TSS")
+    gof.decimal <- c(gof.decimal, TRUE, TRUE)
+  }
+  if (isTRUE(include.nobs)) {
+    n <- nobs(model)
+    gof <- c(gof, n)
     gof.names <- c(gof.names, "Num. obs.")
-    gof.decimal <- c(gof.decimal, TRUE)
-  }
-  if (include.groups == TRUE){
-    ngroups <- sqrt(length(s$Sigma))
-    gof <- c(gof, ngroups)
-    gof.names <- c(gof.names, "Num. panels")
     gof.decimal <- c(gof.decimal, FALSE)
   }
 
-  tr <- createTexreg(coef.names = coefficient.names,
-                     coef = co,
-                     se = se,
-                     pvalues = pval,
-                     gof.names = gof.names,
-                     gof = gof
+  tr <- createTexreg(
+    coef.names = coefnames,
+    coef = co,
+    se = se,
+    pvalues = pval,
+    gof.names = gof.names,
+    gof = gof,
+    gof.decimal = gof.decimal
   )
   return(tr)
 }
 
-#' \code{\link{extract}} method for \code{panelAR} objects
+#' \code{\link{extract}} method for \code{pcce} objects
 #'
-#' \code{\link{extract}} method for \code{panelAR} objects created by the
-#' \code{\link[panelAR]{panelAR}} function in the \pkg{panelAR} package.
+#' \code{\link{extract}} method for \code{pcce} objects created by the
+#' \code{\link[plm]{pcce}} function in the \pkg{plm} package.
 #'
 #' @param model A statistical model object.
-#' @param include.rsquared Report R^2 in the GOF block?
+#' @param include.r.squared Report the HPY R-squared statistic in the GOF block?
+#' @param include.sumsquares Report the total and residual sum of squares in the
+#'   GOF block?
 #' @param include.nobs Report the number of observations in the GOF block?
-#' @param include.groups Report the number of groups?
 #' @param ... Custom parameters, which are handed over to subroutines, in this
 #'   case to the \code{summary} method for the object.
 #'
-#' @method extract panelAR
-#' @aliases extract.panelAR
+#' @method extract pcce
+#' @aliases extract.pcce
 #' @export
-setMethod("extract", signature = className("panelAR", "panelAR"),
-          definition = extract.panelAR)
+setMethod("extract", signature = className("pcce", "plm"),
+          definition = extract.pcce)
 
 
 # -- extract.pglm (pglm) -------------------------------------------------------
@@ -6612,10 +6790,10 @@ setMethod("extract", signature = className("rq", "quantreg"),
           definition = extract.rq)
 
 
-# -- extract.sarlm (spatialreg) ------------------------------------------------
+# -- extract.Sarlm (spatialreg) ------------------------------------------------
 
 #' @noRd
-extract.sarlm <- function(model,
+extract.Sarlm <- function(model,
                           include.nobs = TRUE,
                           include.loglik = TRUE,
                           include.aic = TRUE,
@@ -6715,9 +6893,9 @@ extract.sarlm <- function(model,
   return(tr)
 }
 
-#' \code{\link{extract}} method for \code{sarlm} objects
+#' \code{\link{extract}} method for \code{Sarlm} objects
 #'
-#' \code{\link{extract}} method for \code{sarlm} objects created by the
+#' \code{\link{extract}} method for \code{Sarlm} objects created by the
 #' \code{\link[spatialreg:ML_models]{lagsarlm}} function in the \pkg{spatialreg}
 #' package.
 #'
@@ -6731,12 +6909,12 @@ extract.sarlm <- function(model,
 #' @param ... Custom parameters, which are handed over to subroutines, in this
 #'   case to the \code{summary} method for the object.
 #'
-#' @method extract sarlm
-#' @aliases extract.sarlm
+#' @method extract Sarlm
+#' @aliases extract.Sarlm
 #' @export
 #' @importFrom stats pnorm AIC
-setMethod("extract", signature = className("sarlm", "spdep"),
-          definition = extract.sarlm)
+setMethod("extract", signature = className("Sarlm", "spatialreg"),
+          definition = extract.Sarlm)
 
 
 # -- extract.sclm (ordinal) ----------------------------------------------------
@@ -7898,6 +8076,78 @@ setMethod("extract", signature = className("tobit", "AER"),
           definition = extract.tobit)
 
 
+# -- extract.truncreg (truncreg) -----------------------------------------------
+
+#' @noRd
+extract.truncreg <- function(model,
+                             include.nobs = TRUE,
+                             include.loglik = TRUE,
+                             include.aic = TRUE,
+                             include.bic = TRUE,
+                             ...) {
+  s <- summary(model, ...)
+  coef_names <- rownames(s$coefficients)
+  coefs <- s$coefficients[, 1]
+  se <- s$coefficients[, 2]
+  pval <- s$coefficients[, 4]
+
+  gof_names <- character()
+  gof_stats <- numeric()
+  gof_decimal <- logical()
+  if (isTRUE(include.nobs)) {
+    gof_names <- c(gof_names, "Num. obs.")
+    gof_stats <- c(gof_stats, s$nobs)
+    gof_decimal <- c(gof_decimal, FALSE)
+  }
+  if (isTRUE(include.loglik)) {
+    gof_names <- c(gof_names, "Log Likelihood")
+    gof_stats <- c(gof_stats, s$logLik)
+    gof_decimal <- c(gof_decimal, TRUE)
+  }
+  if (isTRUE(include.aic)) {
+    gof_names <- c(gof_names, "AIC")
+    aic <- (-2 * s$logLik) + (2 * length(model$coefficients))
+    gof_stats <- c(gof_stats, aic)
+    gof_decimal <- c(gof_decimal, TRUE)
+  }
+  if (isTRUE(include.bic)) {
+    gof_names <- c(gof_names, "BIC")
+    bic <- (-2 * s$logLik) + (log(model$nobs) * length(model$coefficients))
+    gof_stats <- c(gof_stats, bic)
+    gof_decimal <- c(gof_decimal, TRUE)
+  }
+
+  createTexreg(coef.names = coef_names,
+               coef = coefs,
+               se = se,
+               pvalues = pval,
+               gof.names = gof_names,
+               gof = gof_stats,
+               gof.decimal = gof_decimal)
+}
+
+#' \code{\link{extract}} method for \code{truncreg} objects
+#'
+#' \code{\link{extract}} method for \code{truncreg} objects created by the
+#' \code{\link[truncreg]{truncreg}} function in the \pkg{truncreg} package.
+#'
+#' @param model A statistical model object.
+#' @param include.nobs Report the number of observations in the GOF block?
+#' @param include.loglik Report the log likelihood in the GOF block?
+#' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
+#'   block?
+#' @param include.bic Report the Bayesian Information Criterion (BIC) in the GOF
+#'   block?
+#' @param ... Custom parameters, which are handed over to subroutines. Currently
+#'   not in use.
+#'
+#' @method extract truncreg
+#' @aliases extract.truncreg
+#' @export
+setMethod("extract", signature = className("truncreg", "truncreg"),
+          definition = extract.truncreg)
+
+
 # -- extract.vglm (VGAM) -------------------------------------------------------
 
 #' @noRd
@@ -8000,7 +8250,7 @@ extract.weibreg <- function(model,
     aic <- 2 * model$loglik[2] + 2 * length(coefs)
     gof <- c(gof, aic)
     gof.names <- c(gof.names, "AIC")
-    gof.decimal <- c(gof.decimal, FALSE)
+    gof.decimal <- c(gof.decimal, TRUE)
   }
   if (include.nobs == TRUE) {
     n <- nobs(model)
@@ -8009,7 +8259,7 @@ extract.weibreg <- function(model,
     gof.decimal <- c(gof.decimal, FALSE)
   }
   if (include.events == TRUE) {
-    ev <- model$events
+    ev <- model$n.events
     gof <- c(gof, ev)
     gof.names <- c(gof.names, "Num. events")
     gof.decimal <- c(gof.decimal, FALSE)
@@ -8120,48 +8370,118 @@ setMethod("extract", signature = className("coxreg", "eha"),
 # -- extract.wls (metaSEM) -----------------------------------------------------
 
 #' @noRd
-extract.wls <- function(model, include.nobs = TRUE, ...) {
+extract.wls <- function(model,
+                        include.statistics = TRUE,
+                        include.nobs = TRUE,
+                        include.aic = TRUE,
+                        include.bic = TRUE,
+                        ...) {
 
   coefnames <- rownames(summary(model)$coef)
-  coefs <- summary(model)$coef[, 1]
-  se <- as.numeric(summary(model)$coef[, 2])
-  pval <- summary(model)$coef[, 6]
-
-  # Compute average variance extracted
-  # Based on: http://openmx.psyc.virginia.edu/thread/3988
-  # Could also check description of reliability() from {semTools}
-  mat <- model$mx.fit$impliedS1$result
-  if (is.null(mat)) {
-    ave <- NULL
-  } else {
-    ave <- mean(mat[nrow(mat), -ncol(mat)])
+  coefs <- summary(model)$coef$Estimate
+  se <- as.numeric(summary(model)$coef$`Std.Error`)
+  pval <- summary(model)$coef$`Pr(>|z|)`
+  ci.l <- summary(model)$coef$lbound
+  ci.u <- summary(model)$coef$ubound
+  if (all(is.na(se))) {
+    se <- numeric(0)
+  }
+  if (all(is.na(pval))) {
+    pval <- numeric(0)
+  }
+  if (all(is.na(ci.l)) && all(is.na(ci.u))) {
+    ci.l <- numeric(0)
+    ci.u <- numeric(0)
+  }
+  # prefer SE and p-values if available
+  if (length(se) > 0 && length(se) == length(pval) &&
+      (length(ci.u) > 0 || length(ci.l) > 0)) {
+    ci.l <- numeric(0)
+    ci.u <- numeric(0)
   }
 
-  chi      <- summary(model)$stat["Chi-square of independence model", 1]
-  dfs       <- summary(model)$stat["DF of independence model", 1]
-  # chi.pval <- summary(model)$stat["p value of target model", 1]
-  # if(pval < .0001) pval <- "< .0001"
-  rmsea    <- summary(model)$stat["RMSEA", 1]
-  rmseall  <- summary(model)$stat["RMSEA lower 95% CI", 1]
-  rmseaul  <- summary(model)$stat["RMSEA upper 95% CI", 1]
-  cfi      <- summary(model)$stat["CFI", 1]
-
-  gof <- c(chi, dfs, rmsea, rmseall, rmseaul, cfi)
-  gof.names <- c("Chi-square of independence model",
-                 "DF of independence model",
-                 "RMSEA", "RMSEA lower 95 percent CI",
-                 "RMSEA upper 95 percent CI",
-                 "CFI")
-  gof.decimal <- c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
-  if (!is.null(ave)) {
-    gof <- c(gof, ave)
-    gof.names <- c(gof.names, "Average variance extracted")
-    gof.decimal <- c(gof.decimal, TRUE)
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (include.statistics == TRUE) {
+    chi <- summary(model)$stat["Chi-square of target model", 1]
+    if (!is.na(chi) && !is.null(chi) && is.finite(chi)) {
+      gof <- c(gof, chi)
+      gof.names <- c(gof.names, "Chi-square of target model")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    dfs <- summary(model)$stat["DF of target model", 1]
+    if (!is.na(dfs) && !is.null(dfs) && is.finite(dfs)) {
+      gof <- c(gof, dfs)
+      gof.names <- c(gof.names, "DF of target model")
+      gof.decimal <- c(gof.decimal, FALSE)
+    }
+    chi.pval <- summary(model)$stat["p value of target model", 1]
+    if (!is.na(chi.pval) && !is.null(chi.pval) && is.finite(chi.pval)) {
+      gof <- c(gof, chi.pval)
+      gof.names <- c(gof.names, "Chi-square p-value")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    rmsea <- summary(model)$stat["RMSEA", 1]
+    if (!is.na(rmsea) && !is.null(rmsea) && is.finite(rmsea)) {
+      gof <- c(gof, rmsea)
+      gof.names <- c(gof.names, "RMSEA")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    rmseall  <- summary(model)$stat["RMSEA lower 95% CI", 1]
+    if (!is.na(rmseall) && !is.null(rmseall) && is.finite(rmseall)) {
+      gof <- c(gof, rmseall)
+      gof.names <- c(gof.names, "RMSEA lower 95 percent CI")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    rmseaul  <- summary(model)$stat["RMSEA upper 95% CI", 1]
+    if (!is.na(rmseaul) && !is.null(rmseaul) && is.finite(rmseaul)) {
+      gof <- c(gof, rmseaul)
+      gof.names <- c(gof.names, "RMSEA upper 95 percent CI")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    cfi <- summary(model)$stat["CFI", 1]
+    if (!is.na(cfi) && !is.null(cfi) && is.finite(cfi)) {
+      gof <- c(gof, cfi)
+      gof.names <- c(gof.names, "CFI")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+    # Compute average variance extracted
+    # Based on: https://cran.r-project.org/web/packages/cSEM/vignettes/Using-assess.html#ave
+    # Given that the model uses standardized loadings: Var() = 1 and the denominator reduces to K
+    # "Empirically, it is the mean square of the standardized loading"
+    mat <- model$mx.fit$impliedS1$result
+    if (is.null(mat)) {
+      ave <- NULL
+    } else {
+      ave <- mean(mat[nrow(mat), -ncol(mat)]^2)
+    }
+    if (!is.null(ave) && !is.na(ave) && is.finite(ave)) {
+      gof <- c(gof, ave)
+      gof.names <- c(gof.names, "Average variance extracted")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
   }
   if (include.nobs == TRUE) {
     gof <- c(gof, summary(model)$stat["Sample size", 1])
     gof.names <- c(gof.names, "Num. obs.")
     gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.aic == TRUE) {
+    aic <- summary(model)$stat["AIC", 1]
+    if (!is.null(aic) && !is.na(aic) && length(aic) == 1 && is.finite(aic)) {
+      gof <- c(gof, aic)
+      gof.names <- c(gof.names, "AIC")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+  }
+  if (include.bic == TRUE) {
+    bic <- summary(model)$stat["BIC", 1]
+    if (!is.null(bic) && !is.na(bic) && length(bic) == 1 && is.finite(bic)) {
+      gof <- c(gof, bic)
+      gof.names <- c(gof.names, "BIC")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
   }
 
   tr <- createTexreg(
@@ -8169,6 +8489,8 @@ extract.wls <- function(model, include.nobs = TRUE, ...) {
     coef = coefs,
     se = se,
     pvalues = pval,
+    ci.low = ci.l,
+    ci.up = ci.u,
     gof.names = gof.names,
     gof = gof,
     gof.decimal = gof.decimal
@@ -8182,13 +8504,17 @@ extract.wls <- function(model, include.nobs = TRUE, ...) {
 #' \code{\link[metaSEM]{wls}} function in the \pkg{metaSEM} package.
 #'
 #' @param model A statistical model object.
+#' @param include.statistics Report RMSEA and other GOF statistics?
 #' @param include.nobs Report the number of observations in the GOF block?
+#' @param include.bic Report BIC?
+#' @param include.aic Report AIC?
 #' @param ... Custom parameters, which are handed over to subroutines. Currently
 #'   not in use.
 #'
 #' @method extract wls
 #' @aliases extract.wls
 #' @author Christoph Riedl <c.riedl@neu.edu>
+#' @author Philip Leifeld
 #' @export
 setMethod("extract", signature = className("wls", "metaSEM"),
           definition = extract.wls)
