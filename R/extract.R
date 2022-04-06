@@ -895,7 +895,7 @@ extract.censReg <- function(model, include.aic = TRUE, include.bic = TRUE,
 #' \code{\link{extract}} method for \code{censReg} objects
 #'
 #' \code{\link{extract}} method for \code{censReg} objects created by the
-#' \code{\link[censReg]{censReg}} function in the \pkg{censReg} package.
+#' \code{censReg} function in the \pkg{censReg} package.
 #'
 #' @param model A statistical model object.
 #' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
@@ -2142,25 +2142,37 @@ extract.fixest <- function(model,
 
   # GOF block: OLS-specific statistics
   if (model$method == "feols" && isTRUE(include.rsquared)) {
-    gof <- c(gof, fixest::r2(model, "r2"))
+    gof <- c(gof, suppressWarnings(fixest::r2(model, "r2")))
     gof.decimal <- c(gof.decimal, TRUE)
     if (isTRUE(include.proj.stats)) {
-      gof <- c(gof, fixest::r2(model, "wr2"))
-      gof.decimal <- c(gof.decimal, TRUE)
-      gof.names <- c(gof.names, "R$^2$ (full model)", "R$^2$ (proj model)")
+      tryCatch({ # wrap in tryCatch because it does not work in some versions
+        gof <- c(gof, suppressWarnings(fixest::r2(model, "wr2")))
+        gof.decimal <- c(gof.decimal, TRUE)
+        gof.names <- c(gof.names, "R$^2$ (full model)", "R$^2$ (proj model)")
+      }, error = function(cond) {
+        gof.names <- c(gof.names, "R$^2$")
+      }, warning = function(cond) {
+        # do nothing in case of a warning
+      })
     } else {
       gof.names <- c(gof.names, "R$^2$")
     }
   }
   if (model$method == "feols" && isTRUE(include.adjrs)) {
-    gof <- c(gof, fixest::r2(model, "ar2"))
+    gof <- c(gof, suppressWarnings(fixest::r2(model, "ar2")))
     gof.decimal <- c(gof.decimal, TRUE)
     if (isTRUE(include.proj.stats)) {
-      gof <- c(gof, fixest::r2(model, "war2"))
-      gof.decimal <- c(gof.decimal, TRUE)
-      gof.names <- c(gof.names,
-                     "Adj. R$^2$ (full model)",
-                     "Adj. R$^2$ (proj model)")
+      tryCatch({ # wrap in tryCatch because it does not work in some versions
+        gof <- c(gof, suppressWarnings(fixest::r2(model, "war2")))
+        gof.decimal <- c(gof.decimal, TRUE)
+        gof.names <- c(gof.names,
+                       "Adj. R$^2$ (full model)",
+                       "Adj. R$^2$ (proj model)")
+      }, error = function(cond) {
+        gof.names <- c(gof.names, "Adj. R$^2$")
+      }, warning = function(cond) {
+        # do nothing in case of a warning
+      })
     } else {
       gof.names <- c(gof.names, "Adj. R$^2$")
     }
@@ -2761,7 +2773,7 @@ extract.geeglm <- function(model,
 #' \code{\link{extract}} method for \code{geeglm} objects
 #'
 #' \code{\link{extract}} method for \code{geeglm} objects created by the
-#' \code{\link[geepack]{geeglm}} function in the \pkg{geepack} package.
+#' \code{geeglm} function in the \pkg{geepack} package.
 #'
 #' @param model A statistical model object.
 #' @param include.scale Report the dispersion or scale parameter?
@@ -4306,7 +4318,7 @@ extract.lmrob <- function(model, include.nobs = TRUE, ...) {
 #' \code{\link{extract}} method for \code{lmrob} objects
 #'
 #' \code{\link{extract}} method for \code{lmrob} objects created by the
-#' \code{\link[robustbase]{lmrob}} function in the \pkg{robustbase} package.
+#' \code{lmrob} function in the \pkg{robustbase} package.
 #'
 #' @param model A statistical model object.
 #' @param include.nobs Report the number of observations in the GOF block?
@@ -4328,7 +4340,7 @@ extract.glmrob <- extract.lmrob
 #' \code{\link{extract}} method for \code{glmrob} objects
 #'
 #' \code{\link{extract}} method for \code{glmrob} objects created by the
-#' \code{\link[robustbase]{glmrob}} function in the \pkg{robustbase} package.
+#' \code{glmrob} function in the \pkg{robustbase} package.
 #'
 #' @inheritParams extract,lmrob-method
 #'
@@ -4475,7 +4487,7 @@ extract.lnam <- function(model,
 #' \code{\link{extract}} method for \code{lnam} objects
 #'
 #' \code{\link{extract}} method for \code{lnam} objects created by the
-#' \code{\link[sna]{lnam}} function in the \pkg{sna} package.
+#' \code{lnam} function in the \pkg{sna} package.
 #'
 #' @param model A statistical model object.
 #' @param include.rsquared Report R^2 in the GOF block?
@@ -4979,6 +4991,71 @@ setMethod("extract", signature = className("maBina", "erer"),
           definition = extract.maBina)
 
 
+# -- extract.maxLik (maxLik) ---------------------------------------------------
+
+#' @noRd
+extract.maxLik <- function(model,
+                           include.loglik = TRUE,
+                           include.aic = TRUE,
+                           ...) {
+
+  s <- summary(model, ...)
+  coefs <- s$estimate[, 1]
+  se <- s$estimate[, 2]
+  pval <- s$estimate[, 4]
+  coefnames <- rownames(s$estimate)
+  if (is.null(coefnames)) {
+    coefnames <- character(length(coefs))
+  }
+
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (isTRUE(include.loglik)) {
+    ll <- stats::logLik(model)[1]
+    if (!is.null(ll) && !is.na(ll)) {
+      gof <- c(gof, ll)
+      gof.names <- c(gof.names, "Log Likelihood")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+  }
+  if (isTRUE(include.aic)) {
+    aic <- stats::AIC(model)[1]
+    if (!is.null(aic) && !is.na(aic)) {
+      gof <- c(gof, aic)
+      gof.names <- c(gof.names, "AIC")
+      gof.decimal <- c(gof.decimal, TRUE)
+    }
+  }
+
+  createTexreg(coef.names = coefnames,
+               coef = coefs,
+               se = se,
+               pvalues = pval,
+               gof.names = gof.names,
+               gof = gof,
+               gof.decimal = gof.decimal)
+}
+
+#' \code{\link{extract}} method for \code{maxLik} objects
+#'
+#' \code{\link{extract}} method for \code{maxLik} objects created by the
+#' \code{\link[maxLik]{maxLik}} function in the \pkg{maxLik} package.
+#'
+#' @param model A statistical model object.
+#' @param include.loglik Report the log likelihood in the GOF block?
+#' @param include.aic Report the AIC in the GOF block?
+#' @param ... Custom parameters, which are handed over to subroutines, in this
+#'   case to the \code{summary} method for the object.
+#'
+#' @method extract maxLik
+#' @aliases extract.maxLik
+#' @importFrom stats AIC logLik
+#' @export
+setMethod("extract", signature = className("maxLik", "maxLik"),
+          definition = extract.maxLik)
+
+
 # -- extract.mhurdle (mhurdle) -------------------------------------------------
 
 #' @noRd
@@ -5274,7 +5351,7 @@ extract.mnlogit <- function(model,
 #' \code{\link{extract}} method for \code{mnlogit} objects
 #'
 #' \code{\link{extract}} method for \code{mnlogit} objects created by the
-#' \code{\link[mnlogit]{mnlogit}} function in the \pkg{mnlogit} package.
+#' \code{mnlogit} function in the \pkg{mnlogit} package.
 #'
 #' @param model A statistical model object.
 #' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
@@ -5892,7 +5969,7 @@ extract.netlogit <- function(model,
 #' \code{\link{extract}} method for \code{netlogit} objects
 #'
 #' \code{\link{extract}} method for \code{netlogit} objects created by the
-#' \code{\link[sna]{netlogit}} function in the \pkg{sna} package.
+#' \code{netlogit} function in the \pkg{sna} package.
 #'
 #' @param model A statistical model object.
 #' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
@@ -6775,7 +6852,7 @@ extract.rq <- function(model,
 #' \code{\link{extract}} method for \code{rq} objects
 #'
 #' \code{\link{extract}} method for \code{rq} objects created by the
-#' \code{\link[quantreg]{rq}} function in the \pkg{quantreg} package.
+#' \code{rq} function in the \pkg{quantreg} package.
 #'
 #' @param model A statistical model object.
 #' @param include.nobs Report the number of observations in the GOF block?
@@ -7043,8 +7120,7 @@ extract.selection <- function(model,
 #' \code{\link{extract}} method for \code{selection} objects
 #'
 #' \code{\link{extract}} method for \code{selection} objects created by the
-#' \code{\link[sampleSelection]{selection}} function in the
-#' \pkg{sampleSelection} package.
+#' \code{selection} function in the \pkg{sampleSelection} package.
 #'
 #' @param model A statistical model object.
 #' @param prefix Include prefix before the label of the coefficient in order to
@@ -7123,7 +7199,7 @@ extract.sienaFit <- function(model, include.iterations = TRUE, ...) {
 #' \code{\link{extract}} method for \code{sienaFit} objects
 #'
 #' \code{\link{extract}} method for \code{sienaFit} objects created by the
-#' \code{\link[RSiena]{siena07}} function in the \pkg{RSiena} package.
+#' \code{siena07} function in the \pkg{RSiena} package.
 #'
 #' @param model A statistical model object.
 #' @param include.iterations Report the number of iterations?
@@ -7467,7 +7543,7 @@ extract.stergm <- function(model,
 #' \code{\link{extract}} method for \code{stergm} objects
 #'
 #' \code{\link{extract}} method for \code{stergm} objects created by the
-#' \code{\link[tergm]{stergm}} function in the \pkg{tergm} package.
+#' \code{stergm} function in the \pkg{tergm} package.
 #'
 #' @param model A statistical model object.
 #' @param beside Arrange the model terms below each other or beside each other?
@@ -7775,7 +7851,7 @@ extract.svyglm <- function(model,
 #' \code{\link{extract}} method for \code{svyglm} objects
 #'
 #' \code{\link{extract}} method for \code{svyglm} objects created by the
-#' \code{\link[survey]{svyglm}} function in the \pkg{survey} package.
+#' \code{svyglm} function in the \pkg{survey} package.
 #'
 #' @param model A statistical model object.
 #' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
@@ -7916,7 +7992,7 @@ extract.systemfit <- function(model,
 #' \code{\link{extract}} method for \code{systemfit} objects
 #'
 #' \code{\link{extract}} method for \code{systemfit} objects created by the
-#' \code{\link[systemfit]{systemfit}} function in the \pkg{systemfit} package.
+#' \code{systemfit} function in the \pkg{systemfit} package.
 #'
 #' @param model A statistical model object.
 #' @param include.rsquared Report R^2 in the GOF block?
@@ -8709,8 +8785,7 @@ extract.zelig <- function(model,
 #' \code{\link{extract}} method for \code{zelig} objects
 #'
 #' \code{\link{extract}} method for \code{zelig} objects created by the
-#' \code{\link[Zelig]{zelig}} function in the \pkg{Zelig} package
-#' (version < 5.0).
+#' \code{zelig} function in the \pkg{Zelig} package (version < 5.0).
 #'
 #' @param model A statistical model object.
 #' @param include.aic Report Akaike's Information Criterion (AIC) in the GOF
@@ -8799,8 +8874,7 @@ extract.Zelig <- function(model,
 #' \code{\link{extract}} method for \code{Zelig} objects
 #'
 #' \code{\link{extract}} method for \code{Zelig} objects created by the
-#' \code{\link[Zelig]{zelig}} function in the \pkg{Zelig} package
-#' (version >= 5.0).
+#' \code{zelig} function in the \pkg{Zelig} package (version >= 5.0).
 #'
 #' @param model A statistical model object.
 #' @param include.nobs Report the number of observations in the GOF block?
@@ -8933,7 +9007,7 @@ extract.zeroinfl <- function(model,
 #' \code{\link{extract}} method for \code{zeroinfl} objects
 #'
 #' \code{\link{extract}} method for \code{zeroinfl} objects created by the
-#' \code{\link[pscl]{zeroinfl}} function in the \pkg{pscl} package.
+#' \code{zeroinfl} function in the \pkg{pscl} package.
 #'
 #' @param model A statistical model object.
 #' @param beside Arrange the model terms below each other or beside each other?
@@ -8966,7 +9040,7 @@ extract.hurdle <- extract.zeroinfl
 #' \code{\link{extract}} method for \code{hurdle} objects
 #'
 #' \code{\link{extract}} method for \code{hurdle} objects created by the
-#' \code{\link[pscl]{hurdle}} function in the \pkg{pscl} package.
+#' \code{hurdle} function in the \pkg{pscl} package.
 #'
 #' @inheritParams extract,zeroinfl-method
 #'

@@ -1,6 +1,6 @@
 Package: texreg
-Version: 1.38.5
-Date: 2022-03-03
+Version: 1.38.6
+Date: 2022-04-06
 Title: Conversion of R Regression Output to LaTeX or HTML Tables
 Authors@R: c(person(given = "Philip", family = "Leifeld", email = "philip.leifeld@essex.ac.uk", role = c("aut", "cre")),
              person(given = "Claudia", family = "Zucca", email = "c.zucca@jads.nl", role = "ctb"))
@@ -14,13 +14,13 @@ Depends: R (>= 3.5)
 Imports: methods, stats, httr
 Enhances: AER, alpaca, betareg, Bergm, bife, biglm, brglm, brms (>=
         2.8.8), btergm, dynlm, eha (>= 2.9.0), erer, ergm (>= 4.1.2),
-        feisr (>= 1.0.1), fGarch, fixest (>= 0.8.2), forecast, gamlss,
+        feisr (>= 1.0.1), fGarch, fixest (>= 0.10.5), forecast, gamlss,
         gamlss.inf, gee, glmmTMB, gmm, gnm, h2o, latentnet, lfe, lme4,
-        lqmm, metaSEM (>= 1.2.5.1), mfx, mhurdle, miceadds, mlogit,
-        mnlogit, MuMIn, nlme, nnet, oglmx, ordinal, pglm, plm (>=
-        2.4.1), relevent, rms, robust, simex, spatialreg (>= 1.2.1),
-        spdep (>= 1.2.2), speedglm, survival, truncreg (>= 0.2.5),
-        VGAM, Zelig
+        lqmm, maxLik (>= 1.4.8), metaSEM (>= 1.2.5.1), mfx, mhurdle,
+        miceadds, mlogit, mnlogit, MuMIn, nlme, nnet, oglmx, ordinal,
+        pglm, plm (>= 2.4.1), relevent, rms, robust, simex, spatialreg
+        (>= 1.2.1), spdep (>= 1.2.2), speedglm, survival, truncreg (>=
+        0.2.5), VGAM, Zelig
 SystemRequirements: pandoc (>= 1.12.3) suggested for using wordreg
         function; LaTeX packages tikz, booktabs, dcolumn, rotating,
         thumbpdf, longtable, paralist for the vignette
@@ -28,9 +28,9 @@ License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2022-03-03 18:45:11 UTC; philip
+Packaged: 2022-04-06 20:09:54 UTC; philip
 Author: Philip Leifeld [aut, cre],
   Claudia Zucca [ctb]
 Maintainer: Philip Leifeld <philip.leifeld@essex.ac.uk>
 Repository: CRAN
-Date/Publication: 2022-03-04 12:40:02 UTC
+Date/Publication: 2022-04-06 22:00:02 UTC
