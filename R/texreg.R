@@ -571,7 +571,7 @@ huxtablereg <- function(l,
          "To do this, enter 'install.packages(\"huxtable\")'.")
   }
 
-  mr.call <- match.call(expand.dots = FALSE)
+  mr.call <- match.call(expand.dots = TRUE)
   mr.call[[1L]] <- quote(texreg::matrixreg)
   mr.call$include.attributes <- TRUE
   mr.call$trim <- TRUE
@@ -4127,7 +4127,7 @@ get_stars_note <- function(stars = c(0.01, 0.05, 0.1),
   if (!output %in% c("ascii", "latex", "html")) {
     stop("'output' argument must be 'ascii', 'latex', or 'html'.")
   }
-  if (!is.numeric(ci.test) && !is.null(ci.test) && !is.na(ci.test)) {
+  if (!is.numeric(ci.test) && !is.null(ci.test) && !any(is.na(ci.test))) {
     stop("The argument 'ci.test' must be NULL, NA, or numeric.")
   }
   if (!is.logical(ci)) {

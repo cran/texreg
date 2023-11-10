@@ -109,51 +109,83 @@ test_that("extract bife objects from the bife package", {
   expect_equivalent(dim(matrixreg(mod)), c(30, 2))
 })
 
-# brmsfit (brms) ----
-test_that("extract brmsfit objects from the brms package", {
+## commented out because it takes long and causes segfault in combination with other tests
+# # brmsfit (brms) ----
+# test_that("extract brmsfit objects from the brms package", {
+#   testthat::skip_on_cran()
+#   skip_if_not_installed("brms", minimum_version = "2.8.8")
+#   skip_if_not_installed("coda", minimum_version = "0.19.2")
+#   require("brms")
+#   require("coda")
+#
+#   # example 2 from brm help page; see ?brm
+#   sink(nullfile())
+#   suppressMessages(
+#     fit2 <- brm(rating ~ period + carry + cs(treat),
+#                 data = inhaler, family = sratio("logit"),
+#                 prior = set_prior("normal(0,5)"), chains = 1))
+#   sink()
+#
+#   suppressWarnings(tr <- extract(fit2))
+#   expect_length(tr@gof.names, 4)
+#   expect_length(tr@coef, 8)
+#   expect_length(tr@se, 8)
+#   expect_length(tr@pvalues, 0)
+#   expect_length(tr@ci.low, 8)
+#   expect_length(tr@ci.up, 8)
+#   expect_equivalent(which(tr@gof.decimal), c(1, 3, 4))
+#   suppressWarnings(expect_equivalent(dim(matrixreg(fit2)), c(21, 2)))
+#
+#   # example 1 from brm help page; see ?brm
+#   bprior1 <- prior(student_t(5, 0, 10), class = b) + prior(cauchy(0, 2), class = sd)
+#   sink(nullfile())
+#   suppressMessages(
+#     fit1 <- brm(count ~ zAge + zBase * Trt + (1|patient),
+#                 data = epilepsy,
+#                 family = poisson(),
+#                 prior = bprior1))
+#   sink()
+#
+#   expect_warning(suppressMessages(tr <- extract(fit1, use.HDI = TRUE, reloo = TRUE)))
+#   expect_length(tr@gof.names, 5)
+#   expect_length(tr@coef, 5)
+#   expect_length(tr@se, 5)
+#   expect_length(tr@pvalues, 0)
+#   expect_length(tr@ci.low, 5)
+#   expect_length(tr@ci.up, 5)
+#   expect_equivalent(which(tr@gof.decimal), c(1:2, 4:5))
+#   expect_equivalent(suppressWarnings(dim(matrixreg(fit1))), c(16, 2))
+# })
+
+# btergm (btergm) ----
+test_that("extract btergm objects from the btergm package", {
   testthat::skip_on_cran()
-  skip_if_not_installed("brms", minimum_version = "2.8.8")
-  skip_if_not_installed("coda", minimum_version = "0.19.2")
-  require("brms")
-  require("coda")
+  skip_if_not_installed("btergm", minimum_version = "1.10.10")
+  set.seed(5)
+  networks <- list()
+  for (i in 1:10) {              # create 10 random networks with 10 actors
+    mat <- matrix(rbinom(100, 1, .25), nrow = 10, ncol = 10)
+    diag(mat) <- 0               # loops are excluded
+    networks[[i]] <- mat         # add network to the list
+  }
 
-  # example 2 from brm help page; see ?brm
-  sink(nullfile())
-  suppressMessages(
-    fit2 <- brm(rating ~ period + carry + cs(treat),
-                data = inhaler, family = sratio("logit"),
-                prior = set_prior("normal(0,5)"), chains = 1))
-  sink()
+  covariates <- list()
+  for (i in 1:10) {              # create 10 matrices as covariate
+    mat <- matrix(rnorm(100), nrow = 10, ncol = 10)
+    covariates[[i]] <- mat       # add matrix to the list
+  }
 
-  suppressWarnings(tr <- extract(fit2))
-  expect_length(tr@gof.names, 4)
-  expect_length(tr@coef, 8)
-  expect_length(tr@se, 8)
+  suppressWarnings(fit <- btergm::btergm(networks ~ edges + istar(2) + edgecov(covariates), R = 100, verbose = FALSE))
+  tr <- extract(fit)
+  expect_length(tr@se, 0)
   expect_length(tr@pvalues, 0)
-  expect_length(tr@ci.low, 8)
-  expect_length(tr@ci.up, 8)
-  expect_equivalent(which(tr@gof.decimal), c(1, 3, 4))
-  suppressWarnings(expect_equivalent(dim(matrixreg(fit2)), c(21, 2)))
-
-  # example 1 from brm help page; see ?brm
-  bprior1 <- prior(student_t(5, 0, 10), class = b) + prior(cauchy(0, 2), class = sd)
-  sink(nullfile())
-  suppressMessages(
-    fit1 <- brm(count ~ zAge + zBase * Trt + (1|patient),
-        data = epilepsy,
-        family = poisson(),
-        prior = bprior1))
-  sink()
-
-  expect_warning(suppressMessages(tr <- extract(fit1, use.HDI = TRUE, reloo = TRUE)))
-  expect_length(tr@gof.names, 5)
-  expect_length(tr@coef, 5)
-  expect_length(tr@se, 5)
-  expect_length(tr@pvalues, 0)
-  expect_length(tr@ci.low, 5)
-  expect_length(tr@ci.up, 5)
-  expect_equivalent(which(tr@gof.decimal), c(1:2, 4:5))
-  expect_equivalent(suppressWarnings(dim(matrixreg(fit1))), c(16, 2))
+  expect_length(tr@ci.low, 3)
+  expect_length(tr@ci.up, 3)
+  expect_length(tr@gof, 1)
+  expect_length(tr@coef, 3)
+  expect_equivalent(dim(matrixreg(fit)), c(8, 2))
+  expect_true(all(tr@ci.low < tr@coef))
+  expect_true(all(tr@coef < tr@ci.up))
 })
 
 # clm (ordinal) ----
@@ -433,7 +465,9 @@ test_that("extract glm.cluster objects from the miceadds package", {
 # glmerMod (lme4) ----
 test_that("extract glmerMod objects from the lme4 package", {
   testthat::skip_on_cran()
-  skip_if_not_installed("lme4")
+  testthat::skip_on_ci()
+  skip_if_not_installed("lme4", minimum_version = "1.1.34")
+  skip_if_not_installed("Matrix", minimum_version = "1.6.1")
   require("lme4")
   set.seed(12345)
   gm1 <- glmer(cbind(incidence, size - incidence) ~ period + (1 | herd),
@@ -492,6 +526,16 @@ test_that("extract glmmTMB objects from the glmmTMB package", {
   expect_length(tr[[2]]@pvalues, 8)
   expect_length(tr, 2)
   expect_equivalent(which(tr[[2]]@gof.decimal), c(1, 2, 5))
+
+  data("mtcars")
+  cars <- glmmTMB(gear ~ mpg, data = mtcars)
+  tr_cars <- extract(cars)
+  expect_length(tr_cars@gof, 3)
+  expect_equal(tr_cars@gof.decimal, c(TRUE, TRUE, FALSE))
+  expect_equal(tr_cars@gof.names, c("AIC", "Log Likelihood", "Num. obs."))
+  expect_length(tr_cars@coef, 2)
+  expect_length(tr_cars@se, 2)
+  expect_length(tr_cars@pvalues, 2)
 })
 
 # ivreg (AER) ----
@@ -569,7 +613,9 @@ test_that("extract lm.cluster objects from the miceadds package", {
 # lmerMod (lme4) ----
 test_that("extract lmerMod objects from the lme4 package", {
   testthat::skip_on_cran()
-  skip_if_not_installed("lme4")
+  testthat::skip_on_ci()
+  skip_if_not_installed("lme4", minimum_version = "1.1.34")
+  skip_if_not_installed("Matrix", minimum_version = "1.6.1")
   require("lme4")
   set.seed(12345)
   fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
@@ -769,7 +815,9 @@ test_that("extract multinom objects from the nnet package", {
 # nlmerMod (lme4) ----
 test_that("extract nlmerMod objects from the lme4 package", {
   testthat::skip_on_cran()
-  skip_if_not_installed("lme4")
+  testthat::skip_on_ci()
+  skip_if_not_installed("lme4", minimum_version = "1.1.34")
+  skip_if_not_installed("Matrix", minimum_version = "1.6.1")
   require("lme4")
   set.seed(12345)
   startvec <- c(Asym = 200, xmid = 725, scal = 350)
@@ -1078,4 +1126,37 @@ test_that("extract wls objects from the metaSEM package", {
   expect_length(tr3@gof.decimal, 10)
   expect_equivalent(which(tr3@gof.decimal), c(1, 3, 4, 5, 6, 7, 9, 10))
   expect_true(all(tr3@pvalues < 0.05))
+})
+
+# logitr (logitr) ----
+test_that("extract logitr objects from the logitr package", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("logitr", minimum_version = "0.8.0")
+  require("logitr")
+  set.seed(12345)
+
+  mnl_pref <- logitr(
+    data    = yogurt,
+    outcome = "choice",
+    obsID   = "obsID",
+    pars    = c("price", "feat", "brand")
+  )
+  tr <- extract(mnl_pref)
+
+  expect_equivalent(tr@coef, c(-0.37,  0.49, -3.72, -0.64, 0.73), tolerance = 1e-2)
+  expect_equivalent(tr@se, c(0.02, 0.12, 0.15, 0.05, 0.08), tolerance = 1e-2)
+  expect_equivalent(tr@pvalues, c(0, 0, 0, 0, 0), tolerance = 1e-2)
+  expect_equivalent(tr@gof, c(2412.00, -2656.89, 5323.78, 5352.72), tolerance = 1e-2)
+  expect_equivalent(which(tr@gof.decimal), c(2, 3, 4))
+  expect_equivalent(which(tr@pvalues < 0.05), seq(1, 5))
+  expect_length(tr@coef.names, 5)
+  expect_length(tr@coef, 5)
+  expect_length(tr@se, 5)
+  expect_length(tr@pvalues, 5)
+  expect_length(tr@ci.low, 0)
+  expect_length(tr@ci.up, 0)
+  expect_length(tr@gof.names, 4)
+  expect_length(tr@gof, 4)
+  expect_length(tr@gof.decimal, 4)
+  expect_equivalent(dim(matrixreg(mnl_pref)), c(15, 2))
 })

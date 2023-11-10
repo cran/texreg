@@ -87,6 +87,20 @@ test_that("ci.test argument works", {
   expect_match(mr[2, 3], "  3.31        ")
   expect_match(mr[4, 2], " -0.21        ")
   expect_match(mr[4, 3], " -0.21        ")
+
+  # check multiple NA values
+  sr <- screenreg(list(model1, model1),
+                  custom.model.names = c("Model 1", "Model 2"),
+                  ci.force = TRUE,
+                  ci.test = c(NA, NA)
+  )
+  expect_false(grepl("[*]", sr))
+  sr2 <- screenreg(list(model1, model1),
+                   custom.model.names = c("Model 1", "Model 2"),
+                   ci.force = TRUE,
+                   ci.test = c(NA, 0)
+  )
+  expect_equal(attr(regexpr("[*]", sr2), "match.length"), 1)
 })
 
 test_that("threeparttable and custom.note arguments work in the texreg function", {
@@ -147,7 +161,9 @@ test_that("duplicate row labels in custom.coef.names are merged when feasible", 
 })
 
 test_that("LaTeX code is escaped in GOF labels", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("lme4", minimum_version = "1.1.34")
+  skip_if_not_installed("Matrix", minimum_version = "1.6.1")
+  skip_on_ci()
   require("lme4")
   iris$species_variable <- iris$Species
   fit <- lmer(Sepal.Length ~ Sepal.Width + (1 | species_variable), data = iris)

@@ -307,14 +307,19 @@ setMethod("extract", signature = className("averaging", "MuMIn"),
 
 #' @noRd
 extract.bergm <- function(model, posterior.median = FALSE, level = 0.95, ...) {
-  coefnames <- model$specs
+  rNames <- paste("theta",
+                  seq(1, model$dim),
+                  " (",
+                  model$specs[seq(1, model$dim)],
+                  ")",
+                  sep = "") # from Bergm 5.0.5 summary.Bergm method
   coefs <- apply(model$Theta, 2, ifelse(isTRUE(posterior.median), median, mean))
   alpha <- (1 - level) / 2
   cil <- apply(model$Theta, 2, function(x) quantile(x, (1 - level) / 2))
   ciu <- apply(model$Theta, 2, function(x) quantile(x, 1 - ((1 - level) / 2)))
 
   tr <- createTexreg(
-    coef.names = coefnames,
+    coef.names = rNames,
     coef = coefs,
     ci.low = cil,
     ci.up = ciu
@@ -813,9 +818,9 @@ extract.btergm <- function(model, level = 0.95, include.nobs = TRUE, ...) {
 
   tr <- createTexreg(
     coef.names = rownames(tab),
-    coef = tab[, 1],
-    ci.low = tab[, 2],
-    ci.up = tab[, 3],
+    coef = tab[, which(grepl("Estimate", colnames(tab)))],
+    ci.low = tab[, which(grepl("2.5", colnames(tab)))],
+    ci.up = tab[, which(grepl("97.5", colnames(tab)))],
     gof.names = gof.names,
     gof = gof,
     gof.decimal = gof.decimal
@@ -3155,7 +3160,7 @@ extract.glmmTMB <- function(model, beside = FALSE, include.count = TRUE,
     gof.names <- c(gof.names, grp.names)
     gof.decimal <- c(gof.decimal, rep(FALSE, length(grps)))
   }
-  if (include.variance == TRUE && !is.na(s$ngrps)) {
+  if (include.variance == TRUE && !is.na(s$ngrps[1]) && (length(s$ngrps$cond) > 0 || length(s$ngrps$zi) > 0)) {
     vc <- glmmTMB::VarCorr(model)
     vc <- as.data.frame(rapply(vc, function(x) attr(x, "stddev")))^2
     rownames(vc) <- gsub("\\.", " ", rownames(vc))
@@ -4016,7 +4021,7 @@ extract.lme4 <- function(model,
                          include.variance = TRUE,
                          ...) {
 
-  if (utils::packageVersion("lme4") < 1.0) {
+  if (utils::packageVersion("lme4") < "1.0") {
     message("Please update to a newer 'lme4' version for full compatibility.")
   }
 
@@ -9050,3 +9055,79 @@ extract.hurdle <- extract.zeroinfl
 #' @export
 setMethod("extract", signature = className("hurdle", "pscl"),
           definition = extract.hurdle)
+
+# -- extract.logitr (logitr >= 0.8.0) ------------------------------------------
+
+#' @noRd
+extract.logitr <- function(model,
+                           include.nobs = TRUE,
+                           include.loglik = TRUE,
+                           include.aic = TRUE,
+                           include.bic = TRUE,
+                           ...) {
+
+  s <- summary(model, ...)
+
+  coefnames <- names(s$coefficients)
+  coefs <- s$coefTable$Estimate
+  se <- s$coefTable$`Std. Error`
+  pval <- s$coefTable$`Pr(>|z|)`
+
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+  if (include.nobs == TRUE) {
+    n <- s$n$obs
+    gof <- c(gof, n)
+    gof.names <- c(gof.names, "Num. obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }
+  if (include.loglik == TRUE) {
+    ll <- s$logLik
+    gof <- c(gof, ll)
+    gof.names <- c(gof.names, "Log Likelihood")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.aic == TRUE) {
+    gof <- c(gof, s$statTable["AIC", ])
+    gof.names <- c(gof.names, "AIC")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.bic == TRUE) {
+    gof <- c(gof, s$statTable["BIC", ])
+    gof.names <- c(gof.names, "BIC")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+
+  tr <- createTexreg(
+    coef.names = coefnames,
+    coef = coefs,
+    se = se,
+    pvalues = pval,
+    gof.names = gof.names,
+    gof = gof,
+    gof.decimal = gof.decimal
+  )
+
+  return(tr)
+}
+
+#' \code{\link{extract}} method for \code{logitr} objects
+#'
+#' \code{\link{extract}} method for \code{logitr} objects created by the
+#' \code{logitr} function in the \pkg{logitr} package.
+#'
+#' @param model A statistical model object.
+#' @param include.nobs Include the number of observations in summary table?
+#' @param include.loglik Include the log-likelihood in summary table?
+#' @param include.aic Include the the AIC in summary table?
+#' @param include.bic Include the the BIC in summary table?
+#' @param ... Custom parameters, which are handed over to subroutines. Currently
+#'   not in use.
+#'
+#' @method extract logitr
+#' @aliases logitr
+#' @author John Paul Helveston, \email{john.helveston@gmail.com}
+#' @export
+setMethod("extract", signature = className("logitr", "logitr"),
+          definition = extract.logitr)
