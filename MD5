@@ -1,13 +1,13 @@
-e1876327d7f8067f29d9e63c0e2fe91f *DESCRIPTION
-a19b6de36ed0d9a9ae9d225f870e75e6 *NAMESPACE
-cd20d450357f84f0644781380c55ce23 *R/extract.R
+7016432861c211e7787c02fc846c7d19 *DESCRIPTION
+4dc576086eb2cf54b53433a35e5e7e8a *NAMESPACE
+df7a9c97ec4db9937a957e45de745d5c *R/extract.R
 d706c53db3aeb559384dc196449fe807 *R/praise.R
-45bbfd3847a3336c81d2ef50a9044c4a *R/texreg.R
-7080893e02c49cd296d4424b9be55069 *build/partial.rdb
-8c605d9e70bb875d32222705ef455279 *build/vignette.rds
+0a4fc3ee1862b3be847981280a370054 *R/texreg.R
+20c8d3f97d93e2e318a22508275b5a02 *build/partial.rdb
+16d27beef37febaf081c67200f3f2495 *build/vignette.rds
 afc5167439432b29c0cb164e2493b094 *inst/CITATION
 5c4dbc21a0d3d6f63559c981d4a5233c *inst/doc/texreg.Rnw
-ce11c3464c329d149d8fb5ed625e7c9c *inst/doc/texreg.pdf
+10b7b2f0146afaa96815ed34a4a5dc31 *inst/doc/texreg.pdf
 af05ba1432a13300b81a542855f9f101 *man/coeftostring.Rd
 49f74453e95a6e26aa2e541dcdffeedb *man/compute.width.Rd
 68a75fab1efada7b4bc251c46893533f *man/createTexreg.Rd
@@ -16,7 +16,6 @@ b79fc3e7851f282f944896447600b719 *man/customcolumnnames.Rd
 1b59156af36a772247f954578223349b *man/extract-Arima-method.Rd
 a43578728564abcc5d1b6cc406de8025 *man/extract-H2OBinomialModel-method.Rd
 b53e4abdd336211bc31da74cd66711c6 *man/extract-Sarlm-method.Rd
-9a6dfc06b4a96c0eada43d705d101471 *man/extract-Zelig-method.Rd
 1ee1621000ef27ececf7efd8ac2b7ace *man/extract-aftreg-method.Rd
 dac63a8bf7aff3ea79fc28a6ed04e1d2 *man/extract-averaging-method.Rd
 83a057e4e87b4e284ecb69de042e5371 *man/extract-bam-method.Rd
@@ -79,12 +78,10 @@ a14b365f1592d3e880343fbf914b6820 *man/extract-logitmfx-method.Rd
 d2e24d0f64df9b3659d02e164797ab75 *man/extract-logitr-method.Rd
 aff17c0e120a63bdab253b28c5b4c0b5 *man/extract-lqmm-method.Rd
 728763a20d39298f6619574af1fa35e5 *man/extract-lrm-method.Rd
-5574b3dc79c7127f82cf035300db0e15 *man/extract-maBina-method.Rd
 108667ca0e29cda6f8d7e27663a5c6e9 *man/extract-maxLik-method.Rd
 dab53052b43c2d100dc6811f26882646 *man/extract-merMod-method.Rd
 cb619be9d7a2480fc6bc303c701ddd7f *man/extract-mhurdle-method.Rd
 8e681b43bfce25f41d6eaa95400f0a88 *man/extract-mlogit-method.Rd
-16ff5db6d87ef51839ada171d91112c9 *man/extract-mnlogit-method.Rd
 5699e0a93672af0d71ca58340fe8a26f *man/extract-model.selection-method.Rd
 52f39a3aed3b63dc605f3d32d8983b47 *man/extract-mtergm-method.Rd
 6281b8e2a4a5b33055740eb534ff2482 *man/extract-multinom-method.Rd
@@ -107,6 +104,7 @@ c6f2809780d80ac8ace4724b420eb3fe *man/extract-poissonmfx-method.Rd
 2fe57ad0166e077b54ec13c71197fd86 *man/extract-polr-method.Rd
 e0ade7e47a10df0897826de2f10e962c *man/extract-probitmfx-method.Rd
 1d709052342207ca56bfb43a8b269ab1 *man/extract-rem.dyad-method.Rd
+2e0639c3a2a39d5d476343e1c0ddbfc4 *man/extract-remstimate-method.Rd
 6bb9dfed664bacf2b5c8b143b8c99cb3 *man/extract-rlm-method.Rd
 83456d852b01ddc1766db4bedbfe9b14 *man/extract-rq-method.Rd
 bdc24351690f4245205853dbbc8f1654 *man/extract-sclm-method.Rd
@@ -144,7 +142,7 @@ e4199f6200a2dae4c7bf73f0047a903a *man/praise.Rd
 77aa22030b0080c91997406c3ee82d92 *man/screenreg.Rd
 1f53c850e8718421c0897fc506c72f76 *man/show-texreg-method.Rd
 04ed1d9146743390137bc668d5a1f1fc *man/texreg-class.Rd
-78b48da3833e0b0ba2692eea33b4ce0e *man/texreg-package.Rd
+e996a6574502f8a69eb104acaf0b6ca6 *man/texreg-package.Rd
 996c3a731cf4494dded10ea870f4ed47 *man/texreg.Rd
 408a813669a860ace4bf7428f52d2507 *man/wordreg.Rd
 59f5aec56adb22bbb49500327623e265 *tests/files/PlotDataFrame.RDS
@@ -158,7 +156,7 @@ a9617291c05e5eeedfaf58ea1fc30bfe *tests/files/jss_screenreg_lm.RDS
 c5898d77e46c38280ba291d29fd4f216 *tests/files/jss_texreg_gls.RDS
 2dd28b52c83cb6807f26790486078e48 *tests/files/jss_texreg_robust.RDS
 8a1d65a00cdb1f7e8cf6823e1e9adf21 *tests/testthat.R
-1ae3de268bac7b32276715e83fcc4285 *tests/testthat/test-extract.R
+35551076aa17d98ec6a59150b67b7d97 *tests/testthat/test-extract.R
 81357635169c81d4e1bf210fcc5428eb *tests/testthat/test-huxtablereg.R
 19e17922579ac9ed45777cdd6ea56bce *tests/testthat/test-jss.R
 93a2f6cad0a637f236c40ddc1990f1a0 *tests/testthat/test-plotreg.R
