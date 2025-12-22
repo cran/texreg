@@ -316,12 +316,12 @@ test_that("arguments work in screenreg function", {
 })
 
 test_that("knitreg function works", {
-  with_mock(requireNamespace = function (package, ...) {
+  with_mocked_bindings(requireNamespace = function (package, ...) {
     ifelse(package == "knitr", return(FALSE), return(TRUE))
   }, {
     expect_error(knitreg(list(model1, model1)), regexp = "knitreg requires the 'knitr' package to be installed")
   })
-  with_mock(requireNamespace = function (package, ...) {
+  with_mocked_bindings(requireNamespace = function (package, ...) {
       ifelse(package == "rmarkdown", return(FALSE), return(TRUE))
     }, {
     expect_error(knitreg(list(model1, model1)), regexp = "knitreg requires the 'rmarkdown' package to be installed")
@@ -335,38 +335,36 @@ test_that("knitreg function works", {
   # the following evaluates that knitreg chooses and outputs the expected format
   knitr::opts_knit$set(out.format = "markdown")
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"html_document"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), htmlreg(model1, doctype = FALSE)))
+  local_mocked_bindings(current_input = function() NULL, .package = "knitr")
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"bookdown::html_document2"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), htmlreg(model1, doctype = FALSE)))
+  test_env <- new.env()
+  local_mocked_bindings(all_output_formats = function(input) test_env$output_format, .package = "rmarkdown")
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"pdf_document"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), texreg(model1, use.packages = FALSE)))
+  test_env$output_format <- "html_document"
+  expect_equivalent(knitreg(model1), htmlreg(model1, doctype = FALSE))
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"bookdown::pdf_document2"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), texreg(model1, use.packages = FALSE)))
+  test_env$output_format <- "bookdown::html_document2"
+  expect_equivalent(knitreg(model1), htmlreg(model1, doctype = FALSE))
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"bookdown::pdf_book"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), texreg(model1, use.packages = FALSE)))
+  test_env$output_format <- "pdf_document"
+  expect_equivalent(knitreg(model1), texreg(model1, use.packages = FALSE))
+
+  test_env$output_format <- "bookdown::pdf_document2"
+  expect_equivalent(knitreg(model1), texreg(model1, use.packages = FALSE))
+
+  test_env$output_format <- "bookdown::pdf_book"
+  expect_equivalent(knitreg(model1), texreg(model1, use.packages = FALSE))
 
   # formatting table to test word output in knitreg
   mr <- matrixreg(model1, output.type = "ascii", include.attributes = FALSE, trim = TRUE)
   colnames(mr) <- mr[1, ]
   mr <- mr[-1, ]
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"word_document"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), knitr::kable(mr)))
+  test_env$output_format <- "word_document"
+  expect_equivalent(knitreg(model1), knitr::kable(mr))
 
-  with_mock("rmarkdown::all_output_formats" = function (input) {"bookdown::word_document2"},
-            "knitr::current_input" = function () {NULL},
-            expect_equivalent(knitreg(model1), knitr::kable(mr)))
+  test_env$output_format <- "bookdown::word_document2"
+  expect_equivalent(knitreg(model1), knitr::kable(mr))
 })
 
 test_that("matrixreg function works", {
@@ -385,4 +383,21 @@ test_that("htmlreg function works", {
                "\\&nbsp;\\&nbsp;\\&nbsp;\\&nbsp;\\&nbsp;Petal\\.Width")
   expect_match(htmlreg(model1, groups = list("First group" = 1, "Second group" = 2), single.row = FALSE),
                "Second group")
+})
+
+test_that("Single coef and no inference in custom extract method works", {
+  # as per https://github.com/leifeld/texreg/issues/209
+  my_obj <- lm(freeny)
+  my_obj2 <- lm(y ~ lag.quarterly.revenue - 1, data = freeny)
+  extract_my_lm <- function(model) {
+    createTexreg(
+      coef.names = names(coef(model)),
+      coef = coef(model),
+      se = numeric(0),
+      pvalues = numeric(0),
+    )
+  }
+  setMethod("extract", signature = className("lm", "stats"), definition = extract_my_lm)
+  expect_no_error(screenreg(my_obj))
+  expect_no_error(screenreg(my_obj2))
 })

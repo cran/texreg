@@ -52,7 +52,7 @@
   Colchester, CO4~6BW\\
   United Kingdom\\
   E-mail: \email{philip.leifeld@essex.ac.uk}\\
-  URL: \url{http://www.philipleifeld.com}
+  URL: \url{https://www.philipleifeld.com}
 }
 
 
@@ -146,7 +146,7 @@ closes this gap and provides a unified framework for typesetting
 {\LaTeX} and HTML tables for various statistical
 models in \proglang{R}. Package \pkg{texreg} is available from
 the Comprehensive \proglang{R} Archive Network (CRAN) at
-\url{http://CRAN.R-project.org/package=texreg}.
+\url{https://CRAN.R-project.org/package=texreg}.
 
 The remainder of this article is structured as follows:
 Section~\ref{requirements} sets out a number of requirements which
@@ -1421,7 +1421,7 @@ order to change the GOF statistics block.
 % %
 % \begin{Schunk}
 % \begin{Sinput}
-% R> install.packages("texreg", repos = "http://R-Forge.R-project.org")
+% R> install.packages("texreg", repos = "https://R-Forge.R-project.org")
 % \end{Sinput}
 % \end{Schunk}
 % %
@@ -1429,13 +1429,13 @@ order to change the GOF statistics block.
 % %
 % \begin{Schunk}
 % \begin{Sinput}
-% R> update.packages("texreg", repos = "http://R-Forge.R-project.org")
+% R> update.packages("texreg", repos = "https://R-Forge.R-project.org")
 % \end{Sinput}
 % \end{Schunk}
 % %
 % Alternatively, the source files and binaries can be downloaded from
 % the \pkg{texreg} homepage
-% (\url{http://r-forge.r-project.org/projects/texreg/}) and installed
+% (\url{https://r-forge.r-project.org/projects/texreg/}) and installed
 % manually by entering something like
 % \begin{Code}
 % $ R CMD INSTALL texreg_1.xx.tar.gz
@@ -1472,7 +1472,7 @@ order to change the GOF statistics block.
 % %
 % If all else fails, more help can be obtained from the homepage of the
 % \pkg{texreg} package.  Questions can be posted to a public forum at
-% \url{http://r-forge.r-project.org/projects/texreg/}.
+% \url{https://r-forge.r-project.org/projects/texreg/}.
 
 \section*{Acknowledgments}
 The author would like to thank Oleg Badunenko, Tom Carsey, S.\,Q. Chang,
