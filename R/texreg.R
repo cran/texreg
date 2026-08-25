@@ -34,6 +34,32 @@ NULL
 #' \code{star.symbol} arguments must be adjusted for the different purposes (see
 #' the description of the arguments).
 #'
+#' Significance stars are wrapped in \code{<sup class="texreg-stars"> ... </sup>},
+#' which formats them in superscript. The \code{texreg-stars} class can be used
+#' to tweak their appearance, for example by increasing the font size and
+#' lowering their vertical alignment via
+#' \preformatted{
+#' <style>
+#'   .texreg-stars {
+#'     font-size: 1.4em;
+#'     vertical-align: -0.6em;
+#'     line-height: 0;
+#'   }
+#' </style>
+#' }
+#' in the HTML, Markdown, or Quarto document or using a \code{css} chunk in an R
+#' Markdown or Quarto document:
+#' \preformatted{
+#' ```{css, echo=FALSE}
+#' /* asterisks inside htmlreg tables */
+#' .texreg-stars {
+#'   font-size: 1.4em;
+#'   vertical-align: -0.6em;
+#'   line-height: 0;
+#' }
+#' ```
+#' }
+#'
 #' @param inline.css Should the CSS stylesheets be embedded directly in the code
 #'   of the table (\code{inline.css = TRUE}), or should the CSS stylesheets be
 #'   enclosed in the <head> tag, that is, separated from the table code
@@ -607,7 +633,12 @@ requireNamespace <- NULL # for testthat mocked bindings
 #' arguments for use with the \pkg{knitr} package, for example in RStudio. The
 #' advantage of using this function with \pkg{knitr} is that the user does not
 #' need to replace the \link{texreg}, \link{htmlreg} etc. function call in the
-#' document when a different output format is selected.
+#' document when a different output format is selected. \pkg{knitr} can be used
+#' directly for compiling \code{.Rnw} documents (integrating R code directly
+#' into LaTeX), with the \pkg{rmarkdown} package (integrating R code into
+#' Markdown and then calling Pandoc to create PDF via LaTeX, HTML, or Word
+#' \code{.docx}), or with Quarto (integrating R code and Quarto markup into
+#' Markdown and then calling Pandoc).
 #'
 #' \link{knitreg} works with...
 #' \itemize{
@@ -627,12 +658,19 @@ requireNamespace <- NULL # for testthat mocked bindings
 #'       \item Presentations (\code{.Rpres} extension, not \code{.Rmd})
 #'     }
 #'   \item \R Notebooks, including preview
+#'   \item Quarto documents (\code{.qmd} extension), rendered as...
+#'     \itemize{
+#'       \item HTML documents
+#'       \item PDF documents
+#'       \item Word documents
+#'       \item Other output formats offered by Pandoc.
+#'     }
 #' }
 #'
-#' If Markdown and HTML rendering are selected, \link{htmlreg} arguments
+#' If Markdown/Quarto and HTML rendering are selected, \link{htmlreg} arguments
 #' \code{doctype = FALSE} and \code{star.symbol = "&#42;"} are set to enable
-#' compatibility with Markdown. With \R HTML documents (but not Markdown) or
-#' presentations (\code{.Rpres} extension), only \code{doctype = FALSE} is set.
+#' compatibility with Markdown/Quarto. With \R HTML documents (but not Markdown)
+#' or \code{.Rpres} presentations, only \code{doctype = FALSE} is set.
 #'
 #' For PDF/LaTeX documents, the \link{texreg} argument
 #' \code{use.packages = FALSE} is set to suppress any package loading
@@ -667,30 +705,44 @@ knitreg <- function(...) {
     stop("knitreg requires the 'rmarkdown' package to be installed.\n",
          "To do this, enter 'install.packages(\"rmarkdown\")'.")
   }
-  of <- knitr::opts_knit$get("out.format")
+
+  # save caption for Word
+  dots <- list(...)
+  cap <- if ("caption" %in% names(dots)) dots$caption else NULL
+
+  of <- knitr::opts_knit$get("out.format") # get output format from knitr options
   if (is.null(of)) { # R Notebook preview (rendered on the R console)
-    screenreg(...)
-  } else if (of == "markdown") { # R Markdown document with extension .Rmd, which can be rendered to HTML, PDF, or Word
-    output <- rmarkdown::all_output_formats(knitr::current_input())[1]
-    if (is.null(output)) { # .Rpres presentation (not .Rmd)
-      htmlreg(..., doctype = FALSE) # do not include document type because inline table
+    screenreg(...) # output ASCII table to console
+  } else if (of == "markdown") { # pandoc: R Markdown (.Rmd), which can be rendered to HTML, PDF, or Word; or Quarto (.qmd) document
+    output <- rmarkdown::all_output_formats(knitr::current_input(dir = TRUE))[1] # get primary target format
+    if (is.null(output) || length(output) == 0 || is.na(output)) { # Quarto or .Rpres presentation (not .Rmd) or unrendered stream
+      if (knitr::is_latex_output()) { # Quarto (format: pdf or beamer) -> use texreg without in-line packages
+        texreg(..., use.packages = FALSE) # do not print \usepackage{dcolumn} etc.
+      } else if (identical(knitr::pandoc_to(), "docx") || identical(knitr::pandoc_to(), "pptx")) { # Quarto with Word/Powerpoint rendering
+        mr <- matrixreg(..., output.type = "ascii", include.attributes = FALSE, trim = TRUE) # get clean matrix representation
+        colnames(mr) <- mr[1, ] # set column names because we want 'kable' to draw a horizontal line under the model names
+        mr <- mr[-1, ] # remove the first row because we already set the model names as column names
+        knitr::kable(mr, caption = cap) # use the kable function to render the table in the Word/PowerPoint document
+      } else { # Quarto rendered to HTML, Reveal.js, or presentation slides
+        htmlreg(..., doctype = FALSE, star.symbol = "&#42;") # do not include document type because inline table; the star symbol must be escaped in Markdown/HTML
+      }
     } else if (output %in% c("html_document", "bookdown::html_document2")) { # .Rmd with HTML rendering via the rmarkdown package
       htmlreg(..., doctype = FALSE, star.symbol = "&#42;") # the star symbol must be escaped in Markdown
     } else if (output %in% c("pdf_document", "bookdown::pdf_document2", "bookdown::pdf_book")) { # .Rmd with PDF LaTeX rendering via the rmarkdown package
       texreg(..., use.packages = FALSE) # do not print \usepackage{dcolumn} etc.
     } else if (output %in% c("word_document", "powerpoint_presentation", "bookdown::word_document2")) { # .Rmd with Word/Powerpoint rendering through the rmarkdown package
-      mr <- matrixreg(..., output.type = "ascii", include.attributes = FALSE, trim = TRUE)
-      colnames(mr) <- mr[1, ] # set column names because we want 'kable' to draw a horizontal  line under the model names
+      mr <- matrixreg(..., output.type = "ascii", include.attributes = FALSE, trim = TRUE) # get clean matrix representation
+      colnames(mr) <- mr[1, ] # set column names because we want 'kable' to draw a horizontal line under the model names
       mr <- mr[-1, ] # remove the first row because we already set the model names as column names
-      knitr::kable(mr) # use the kable function to render the table in the Word document
+      knitr::kable(mr, caption = cap) # use the kable function to render the table in the Word/Powerpoint document
     } else { # unknown other output format through the rmarkdown package
       htmlreg(..., doctype = FALSE)
-    }
+    } # after this: non-pandoc legacy rendering engines and LaTeX with knitr
   } else if (of == "html") { # R HTML document with extension .Rhtml (do not escape '*' symbol!)
     htmlreg(..., doctype = FALSE)
   } else if (of == "latex") { # knitr LaTeX .Rnw documents rendered to PDF
     texreg(..., use.packages = FALSE) # do not print \usepackage{dcolumn} etc.
-  } else if (of == "sweave") { # Sweave LaTeX .Rnw documents rendered to PDF
+  } else if (of == "sweave") { # Sweave LaTeX .Rnw documents rendered to PDF (fallback, but should have been directed to of == "latex" already)
     texreg(..., use.packages = FALSE) # do not print \usepackage{dcolumn} etc.
   } else if (of == "jekyll") { # not sure how Jekyll works, but I'll assume plain ASCII for now
     screenreg(...)
@@ -1480,7 +1532,7 @@ matrixreg <- function(l,
     posinfstring <- "Inf"
     se.prefix <- " ("
     se.suffix <- ")"
-    star.prefix <- paste0("<sup>")
+    star.prefix <- paste0("<sup class=\"texreg-stars\">")
     star.suffix <- "</sup>"
     dcolumn <- TRUE
     bold.prefix <- "<b>"
@@ -3133,15 +3185,6 @@ texreg <- function(l,
     }
   }
 
-  # check siunitx vs. threeparttable
-  if (isTRUE(siunitx) && isTRUE(threeparttable)) {
-    siunitx <- FALSE
-    msg <- paste("The siunitx package and the threeparttable package cannot be",
-                 "used together. Switching off 'siunitx'. Consider using
-                 'dcolumn = TRUE' instead for decimal point alignment.")
-    warning(msg)
-  }
-
   # check longtable vs. sideways
   if (isTRUE(longtable) && isTRUE(sideways)) {
     sideways <- FALSE
@@ -3710,10 +3753,13 @@ texreg <- function(l,
 #' The \code{wordreg} function creates a Microsoft Word document with the
 #' requested table.
 #'
+#' @param caption The caption for the table. Needs to be supplied as a single
+#'   character object. Note that "Table 1: ", "Table 2: ", etc. is not included
+#'   and needs to be added manually to the caption if desired.
 #' @inheritParams matrixreg
 #' @inheritParams texreg
 #'
-#' @author Vincent Arel-Bundock
+#' @author Vincent Arel-Bundock, Philip Leifeld
 #' @family texreg
 #' @seealso \code{\link{texreg-package}} \code{\link{extract}}
 #'
@@ -3758,6 +3804,7 @@ wordreg <- function(l,
                     groups = NULL,
                     custom.columns = NULL,
                     custom.col.pos = NULL,
+                    caption = NULL,
                     ...) {
 
   if (!requireNamespace("rmarkdown", quietly = TRUE)) {
@@ -3766,6 +3813,19 @@ wordreg <- function(l,
   }
   if (is.null(file)) {
     stop("'file' must be a valid file path.")
+  }
+  if (!is.null(caption)){
+    if (is.na(caption)) {
+      caption <- NULL
+    } else if (!is.character(caption)) {
+      caption <- as.character(caption)
+      warning("Caption converted to character object.")
+    } else if (length(caption) == 0) {
+      caption <- NULL
+    } else if (length(caption) > 1) {
+      caption <- paste0(caption, collapse = "")
+      warning("Multiple captions provided. They are collapsed into a single string.")
+    }
   }
   mat <- matrixreg(l,
                    single.row = single.row,
@@ -3807,7 +3867,7 @@ wordreg <- function(l,
     dvnames <- NA
   }
   cat(file = f, "```{r, echo = FALSE}
-                    knitr::kable(mat, col.names = dvnames)
+                    knitr::kable(mat, col.names = dvnames, caption = caption)
                     ```", append = TRUE)
   rmarkdown::render(f, output_file = paste0(wd, "/", file))
 }
@@ -4184,7 +4244,7 @@ get_stars_note <- function(stars = c(0.01, 0.05, 0.1),
                        st,
                        "$")
     } else if (output == "html") {
-      p_note <- paste0("<sup>",
+      p_note <- paste0("<sup class=\"texreg-stars\">",
                        symbols,
                        "</sup>p &lt; ",
                        st)
